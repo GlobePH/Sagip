@@ -90,6 +90,10 @@ app.get('/', function (req, res) {
     res.render("home", {title: "Home", showBar: true});
 });
 
+app.get('/test', function (req, res) {
+    io.emit('add message', "hi");
+});
+
 app.get('/messaging', function (req, res) {
     res.render("messaging", {title: "Messaging ", showBar: false});
 });
@@ -125,7 +129,7 @@ app.get('/locate', function (req, res) {
 app.get('/location', function (req, res) {
     var id = req.query['id'];
     req.models.location.get(id, function (err, location) {
-        console.log(location);
+        console.log(JSON.stringify(location));
         res.send(JSON.stringify({"location": location}));
     });
 });
@@ -214,11 +218,14 @@ function onProcessGETCallback(req, res, next) {
             currentLocation = locationJson.terminalLocationList.terminalLocation.currentLocation;
             address_url = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + currentLocation.latitude + "," + currentLocation.longitude;
 
+            io.emit('add marker', currentLocation.latitude, currentLocation.longitude);
+
             request(address_url, function (err, response, body) {
                 if (!err && response.statusCode == 200) {
                     console.log(body);
                     addressJson = JSON.parse(body);
                     var address = addressJson.results[0].formatted_address;
+
 
                     req.models.location.create({
                         address: address,
@@ -306,13 +313,27 @@ app.post(notifyUrl, function (req, res, next) {
 
 
 /*
- * Listener
+ * Socket.io
  */
 
-// http.listen(3000, function () {
-//     console.log('Example app listening on port 3000!');
+io.on('connection', function (socket) {
+    socket.on('chat message', function (msg) {
+        io.emit('chat message', msg);
+    });
+});
+
+/*
+ * Socket.io
+ */
+// io.on('connection', function(socket){
+//     socket.on('chat message', function(msg){
+//
+//     });
 // });
 
+/*
+ * Listener
+ */
 http.listen(app.get('port'), function () {
     console.log('Node app is running on port', app.get('port'));
 });
