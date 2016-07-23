@@ -156,8 +156,8 @@ app.get('/send', function (req, res) {
      * @param subscriber = where to send the msg
      * @param accessToken = at of subscriber
      * */
-    // 9778198743
-    var numbers = ['9754880843'];
+    //
+    var numbers = ['9778198743'];
     sendBulk(req, numbers);
     res.send({});
 
@@ -223,9 +223,9 @@ function onProcessGETCallback(req, res, next) {
 
     request(location_url, function (err, response, body) {
         if (!err && response.statusCode == 200) {
-            console.log(body);
+            // console.log(body);
             locationJson = JSON.parse(body);
-            console.log(locationJson.terminalLocationList);
+            // console.log(locationJson.terminalLocationList);
 
             // TODO : For Testing
             currentLocation = locationJson.terminalLocationList.terminalLocation.currentLocation;
@@ -235,7 +235,7 @@ function onProcessGETCallback(req, res, next) {
 
             request(address_url, function (err, response, body) {
                 if (!err && response.statusCode == 200) {
-                    console.log(body);
+                    // console.log(body);
                     addressJson = JSON.parse(body);
                     var address = addressJson.results[0].formatted_address;
 
@@ -255,6 +255,8 @@ function onProcessGETCallback(req, res, next) {
                             if (err) throw err;
                             if (exists) {
                                 req.models.subscribers.find({subscriber_number: subscriberNumber}).each(function (subscriber) {
+                                    console.log("When updating");
+                                    console.log(accessToken);
                                     subscriber.acces_token = accessToken;
                                     subscriber.active = true;
                                     subscriber.setCurrentLocation(location, function (err) {
