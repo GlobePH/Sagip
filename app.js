@@ -139,6 +139,14 @@ app.get('/subscribers', function (req, res) {
     });
 });
 
+app.get('/subscriber-messages', function (req, res) {
+    var senderId = req.query['subscriber_id'];
+    req.models.message.find({sender_id : senderId}.all( function (err, messages) {
+        if (err) throw error;
+        res.send(JSON.stringify({"users": messages}));
+    }));
+});
+
 app.get('/send', function (req, res) {
     /*Send the sms message to notify url via GET to text subscriber
      * @param subscriber = where to send the msg
@@ -174,7 +182,6 @@ app.get('/send', function (req, res) {
         })
 
     });
-
 });
 
 
@@ -253,7 +260,6 @@ function onProcessGETCallback(req, res, next) {
                     });
                 }
             });
-
         }
     });
 
