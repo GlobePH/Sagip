@@ -2,22 +2,26 @@ $(document).ready(function () {
     getSubscribers();
     getLocations();
 
-    $('#send-msg').on('click', function () {
+    $('#send-msg').click(function () {
         addMessage(true, $('#compose-text').val(), new Date().toDateString());
         sendMessage($('#thread-title h4').html(), $('#compose-text').val());
         $('#compose-text').val('');
     });
 
-    $('new-message-modal').on('shown.bs.modal', function () {
+    $('#new-message-modal').on('shown.bs.modal', function () {
     });
 
-    $('#select-all-group').on('click', function () {
+    $('#select-all-group').click(function () {
         $('.check-location-option').each(function () {
             if ($('#select-all-group').is(':checked'))
                 $(this).prop('checked', true);
             else
                 $(this).prop('checked', false);
         });
+    });
+
+    $('#filter-location-button').click(function(){
+        $('#new-message-modal').modal('hide');
     });
 
 });

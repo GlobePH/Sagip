@@ -104,13 +104,16 @@ app.get('/', function (req, res) {
 });
 
 app.get('/messaging', function (req, res) {
-    res.render("messaging", {title: "Messaging ", showBar: false});
+    res.render("messaging", {title: "Messaging", showBar: false});
 });
 
 app.get('/partners', function (req, res) {
-    res.render("organizations", {title: "Partner Organizaztions ", showBar: false});
+    res.render("organizations", {title: "Partner Organizaztions", showBar: false});
 });
 
+app.get('/logs', function (req, res) {
+    res.render("logs", {title: "Logs ", showBar: false});
+});
 
 /*
  * Sagip API
