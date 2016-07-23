@@ -145,7 +145,7 @@ app.get('/subscribers', function (req, res) {
 
 app.get('/subscriber-messages', function (req, res) {
     var senderId = req.query['subscriber_id'];
-    req.models.message.find({sender_id : senderId}.all( function (err, messages) {
+    req.models.message.find({sender_id: senderId}.all(function (err, messages) {
         if (err) throw error;
         res.send(JSON.stringify({"users": messages}));
     }));
@@ -156,14 +156,21 @@ app.get('/send', function (req, res) {
      * @param subscriber = where to send the msg
      * @param accessToken = at of subscriber
      * */
-    req.models.subscribers.find({subscriber_number: "9754880843"}, function (err, data) {
-        data = data[1];
+    // 9778198743
+    var numbers = ['9754880843'];
+    sendBulk(req, numbers);
+    res.send({});
 
+});
+
+function send(req, number) {
+    req.models.subscribers.find({subscriber_number: number}, function (err, data) {
+        data = data[0];
         var subscriber = data.subscriber_number;
         var accessToken = data.access_token;
         var send_url = 'https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/' + appShortCode + '/requests?access_token=' + accessToken;
         var message = "Hello";
-        var data = {
+        var form = {
             "outboundSMSMessageRequest": {
                 "clientCorrelator": "123456",
                 "senderAddress": "tel:" + 6966,
@@ -174,7 +181,7 @@ app.get('/send', function (req, res) {
 
         var options = {
             url: send_url,
-            form: data
+            form: form
         };
 
         request.post(options, function (error, response, body) {
@@ -186,8 +193,16 @@ app.get('/send', function (req, res) {
         })
 
     });
-});
+}
 
+function sendBulk(req, numbers) {
+    console.log("sending");
+    for (var i = 0; i < numbers.length; i++) {
+        console.log("before single send");
+        console.log(numbers[i]);
+        send(req, numbers[i]);
+    }
+}
 
 /*
  * Globe API
@@ -205,9 +220,7 @@ function onProcessGETCallback(req, res, next) {
     var subscriberNumber = req.query['subscriber_number'];
     var accuracy = 1;
     var location_url = 'https://devapi.globelabs.com.ph/location/v1/queries/location?access_token=' + accessToken + '&address=' + subscriberNumber + '&requestedAccuracy=' + accuracy;
-    // TODO: CHECK IF SUBSCRIBER NUMBER ALREADY EXISTS, IF YES, SIMPLY UPDATE ACCESS TOKEN,
-    // AND SET IS_ACTIVE TO TRUE.
-    // TODO: Subscriber should be unique
+
     request(location_url, function (err, response, body) {
         if (!err && response.statusCode == 200) {
             console.log(body);
@@ -249,6 +262,7 @@ function onProcessGETCallback(req, res, next) {
                                     });
                                 }).save(function (err) {
                                     if (err) throw err;
+                                    console.log("Subscriber updated");
                                 });
                             } else {
                                 req.models.subscribers.create({
@@ -321,15 +335,6 @@ io.on('connection', function (socket) {
         io.emit('chat message', msg);
     });
 });
-
-/*
- * Socket.io
- */
-// io.on('connection', function(socket){
-//     socket.on('chat message', function(msg){
-//
-//     });
-// });
 
 /*
  * Listener
