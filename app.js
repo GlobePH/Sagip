@@ -316,7 +316,7 @@ app.post(notifyUrl, function (req, res, next) {
     var subscriberNumber = messageJson.inboundSMSMessageList.inboundSMSMessage[0].senderAddress.slice(7);
     console.log(subscriberNumber);
 
-    req.models.message.create({
+    req.models.messages.create({
         content: message,
         timestamp: new Date()
     }, function (err, msg) {
