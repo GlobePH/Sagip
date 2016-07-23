@@ -16,10 +16,10 @@ $(document).ready(function () {
     });
 
     $("#floating-filter").on("click", function () {
-        var checkedValues = $('input:checkbox:checked').map(function () {
-            return this.id;
-        }).get();
-        console.log(checkedValues);
+        setMapOnMarkers(null, markers);
+        var filter = $('input:checkbox:checked').attr('id');
+        console.log(filter);
+        fetchFromDataSource(filter);
     });
 });
 
@@ -55,7 +55,7 @@ function initializeMap() {
 
             addMarker(origin_latitude, origin_longitude, icons[6]);
             map.setCenter(origin_location);
-            fetchFromDataSource();
+            fetchFromDataSource("");
         });
 
     } else {
@@ -64,15 +64,15 @@ function initializeMap() {
 
 }
 
-function fetchFromDataSource() {
-    $.get("/subscribers?filter=a,b", function (data) {
+function fetchFromDataSource(filter) {
+    url = "/subscribers?filter=" + filter;
+    $.get(url, function (data) {
         var list = $.parseJSON(data).users;
 
         if(!list) {
             console.log("no data to fetch from source");
             return;
         }
-
         for (var i = 0; i < list.length; i++) {
             var url = "/location?id=" + list[i].currentlocation_id;
             $.get(url, function (subscriber) {
