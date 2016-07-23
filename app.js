@@ -84,7 +84,7 @@ app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
  */
 
 app.get('/', function (req, res) {
-    res.render("home", {title : "Home"});
+    res.render("home", {title : "Home", showBar: true});
 });
 
 app.get('/locate', function (req, res) {
