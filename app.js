@@ -85,7 +85,11 @@ app.get('/users', function (req, res) {
      * @param filter: Filter users by subscribers / rescuers
      * */
     // TODO: Query all subscribers and rescuers here...
-    var users = [];
+    var dummy = {
+        "latitude": "14.5609722",
+        "longitude": "121.0193394"
+    };
+    var users = [dummy];
     res.send(JSON.stringify({"users": users}));
 });
 
@@ -125,6 +129,7 @@ function onProcessGETCallback(req, res, next) {
 app.post(callbackUrl, function (request, response, next) {
     console.log(JSON.stringify(request.body, null, 4));
 });
+
 
 
 /*
