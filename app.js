@@ -151,7 +151,7 @@ app.get('/subscriber-messages', function (req, res) {
     });
 });
 
-app.get('/send', function (req, res) {
+app.get('/broadcast', function (req, res) {
     /*Send the sms message to notify url via GET to text subscriber
      * @param subscriber = where to send the msg
      * @param accessToken = at of subscriber
@@ -161,8 +161,12 @@ app.get('/send', function (req, res) {
         sendBulk(req, data);
         res.send({});
     });
+});
 
-
+app.get('/send-message', function (req, res) {
+    var number = req.query['subscriber_number'];
+    var message = req.query['message'];
+    send(req, number, message);
 });
 
 function sendBulk(req, data) {
@@ -177,7 +181,7 @@ function sendBulk(req, data) {
     }
 }
 
-function send(req, number) {
+function send(req, number, message) {
     /*
      * Send sms to a single number
      * */
@@ -186,7 +190,7 @@ function send(req, number) {
         var subscriber = data.subscriber_number;
         var accessToken = data.access_token;
         var send_url = 'https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/' + appShortCode + '/requests?access_token=' + accessToken;
-        var message = "Hello";
+        var message = message;
         var form = {
             "outboundSMSMessageRequest": {
                 "clientCorrelator": "123456",
