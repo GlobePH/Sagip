@@ -22765,7 +22765,7 @@ is set to `true`. The parse error is stored in `ngModel.$error.parse`.
               element.on('blur keyup change', function() {
                 scope.$evalAsync(read);
               });
-              read(); // initialize
+              read(); initializeMap
 
               // Write data to the model
               function read() {

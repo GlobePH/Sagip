@@ -2967,7 +2967,7 @@
      *
      * @private
      * @param {Function} setter The function to set keys and values of the accumulator object.
-     * @param {Function} [initializer] The function to initialize the accumulator object.
+     * @param {Function} [initializer] The function to initializeMap the accumulator object.
      * @returns {Function} Returns the new aggregator function.
      */
     function createAggregator(setter, initializer) {
@@ -8004,10 +8004,10 @@
      * @returns {Function} Returns the new restricted function.
      * @example
      *
-     * var initialize = _.once(createApplication);
-     * initialize();
-     * initialize();
-     * // `initialize` invokes `createApplication` once
+     * var initializeMap = _.once(createApplication);
+     * initializeMap();
+     * initializeMap();
+     * // `initializeMap` invokes `createApplication` once
      */
     function once(func) {
       return before(2, func);
