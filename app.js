@@ -118,11 +118,12 @@ function onProcessGETCallback(req, res, next) {
             locationJson = body;
             console.log(locationJson);
 
-            req.models.location.create({accuracy : locationJson.accuracy,
-                                        altitude : locationJson.altitude,
-                                        latitude : locationJson.latitude,
-                                        longitude : locationJson.longitude,
-                                        map_url : locationJson.map_url,
+            currentLocation = locationJson.terminalLocationList.terminalLocation.currentLocation;
+            req.models.location.create({accuracy : currentLocation.accuracy,
+                                        altitude : currentLocation.altitude,
+                                        latitude : currentLocation.latitude,
+                                        longitude : currentLocation.longitude,
+                                        map_url : currentLocation.map_url,
                                         timestamp : new Date() }, function (err, location) {
                 if (err) throw err;
 
