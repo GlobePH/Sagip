@@ -125,7 +125,7 @@ app.get('/locate', function (req, res) {
 app.get('/location', function (req, res) {
     var id = req.query['id'];
     req.models.location.get(id, function (err, location) {
-        console.log(location);
+        console.log(JSON.stringify(location));
         res.send(JSON.stringify({"location": location}));
     });
 });
@@ -300,13 +300,27 @@ app.post(notifyUrl, function (req, res, next) {
 
 
 /*
- * Listener
+ * Socket.io
  */
 
-// http.listen(3000, function () {
-//     console.log('Example app listening on port 3000!');
-// });
+io.on('connection', function(socket){
+    socket.on('chat message', function(msg){
+        io.emit('chat message', msg);
+    });
+});
 
+/*
+ * Socket.io
+ */
+io.on('connection', function(socket){
+    socket.on('chat message', function(msg){
+        io.emit('chat message', msg);
+    });
+});
+
+/*
+ * Listener
+ */
 http.listen(app.get('port'), function () {
     console.log('Node app is running on port', app.get('port'));
 });
