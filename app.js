@@ -147,7 +147,7 @@ app.get('/subscriber-messages', function (req, res) {
     var senderId = req.query['subscriber_id'];
     req.models.message.find({sender_id: senderId}.all(function (err, messages) {
         if (err) throw error;
-        res.send(JSON.stringify({"users": messages}));
+        res.send(JSON.stringify({"messages": messages}));
     }));
 });
 
@@ -156,10 +156,12 @@ app.get('/send', function (req, res) {
      * @param subscriber = where to send the msg
      * @param accessToken = at of subscriber
      * */
-    //
-    var numbers = ['9778198743'];
-    sendBulk(req, numbers);
-    res.send({});
+    req.models.subscribers.all(function (err, data) {
+        console.log(data);
+        sendBulk(req, data);
+        res.send({});
+    });
+
 
 });
 
@@ -195,12 +197,12 @@ function send(req, number) {
     });
 }
 
-function sendBulk(req, numbers) {
+function sendBulk(req, data) {
     console.log("sending");
-    for (var i = 0; i < numbers.length; i++) {
+    for (var i = 0; i < data.length; i++) {
         console.log("before single send");
-        console.log(numbers[i]);
-        send(req, numbers[i]);
+        console.log(data[i].subscriber_number);
+        send(req, data[i].subscriber_number);
     }
 }
 
@@ -257,7 +259,7 @@ function onProcessGETCallback(req, res, next) {
                                 req.models.subscribers.find({subscriber_number: subscriberNumber}).each(function (subscriber) {
                                     console.log("When updating");
                                     console.log(accessToken);
-                                    subscriber.acces_token = accessToken;
+                                    subscriber.access_token = accessToken;
                                     subscriber.active = true;
                                     subscriber.setCurrentLocation(location, function (err) {
                                         if (err) throw err;
