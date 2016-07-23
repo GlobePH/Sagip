@@ -9,7 +9,6 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var request = require('request');
 var orm = require('orm');
-var request = require('request');
 
 app.set('views', path.join(__dirname, 'views'));
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
@@ -62,13 +61,13 @@ app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
 
         models.message = db.define("message", {
             content: String,
-            timestamp : Date
+            timestamp: Date
         });
 
         models.subscribers.hasOne('currentLocation', models.location);
         models.subscribers.hasOne('baseLocation', models.location);
 
-        models.message.hasOne('sender', models.subscriber, {reverse : "messages"});
+        models.message.hasOne('sender', models.subscriber, {reverse: "messages"});
 
         models.user.hasOne("organization", models.organization);
 
@@ -85,7 +84,20 @@ app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
  */
 
 app.get('/', function (req, res) {
-    res.render('home', {title : "Home"});
+    res.render("home", {title : "Home"});
+});
+
+app.get('/locate', function (req, res) {
+    var units = req.query['units'];
+    var origins = req.query['origins'];
+    var destinations = req.query['destinations'];
+
+    var url = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=' + origins + '&destinations=' + destinations + '&key=AIzaSyBKKTvirqm2LvwZaPD6ymCF5QS_oHueYfg';
+    request(url, function (error, response, body) {
+        console.log(body);
+        res.send({"data": body});
+    });
+
 });
 
 /*
@@ -97,8 +109,8 @@ app.get('/users', function (req, res) {
      * */
 
     var users;
-    req.models.users.all(function(err, user) {
-        if(err) throw error;
+    req.models.users.all(function (err, user) {
+        if (err) throw error;
         users = user;
         res.send(JSON.stringify({"users": users}));
     });
@@ -106,8 +118,8 @@ app.get('/users', function (req, res) {
 
 app.get('/subscribers', function (req, res) {
     var subscribers;
-    req.models.subscribers.all(function(err, subscriber) {
-        if(err) throw error;
+    req.models.subscribers.all(function (err, subscriber) {
+        if (err) throw error;
         subscribers = subscriber;
         res.send(JSON.stringify({"users": subscribers}));
     });
@@ -150,6 +162,7 @@ app.get('/send', function (req, res) {
 
 });
 
+
 /*
  * Globe API
  * */
@@ -187,14 +200,18 @@ function onProcessGETCallback(req, res, next) {
             }, function (err, location) {
                 if (err) throw err;
 
-                req.models.subscribers.exists({subscriber_number : subscriberNumber}, function (err, exists) {
-                    if(err) throw err;
-                    if(exists) {
-                        req.models.subscribers.find({subscriber_number : subscriberNumber}, function (err, subscriber) {
+                req.models.subscribers.exists({subscriber_number: subscriberNumber}, function (err, exists) {
+                    if (err) throw err;
+                    if (exists) {
+                        req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
                             subscriber.acces_token = accessToken;
                             subscriber.active = 1;
-                            subscribers.setCurrentLocation(location, function (err) { if (err) throw err; });
-                        }).save(function (err) { if(err) throw err; });
+                            subscribers.setCurrentLocation(location, function (err) {
+                                if (err) throw err;
+                            });
+                        }).save(function (err) {
+                            if (err) throw err;
+                        });
                     } else {
                         req.models.subscribers.create({
                             access_token: accessToken,
@@ -203,7 +220,9 @@ function onProcessGETCallback(req, res, next) {
                             active: 1
                         }, function (err, subscribers) {
                             if (err) throw err;
-                            subscribers.setCurrentLocation(location, function (err) { if (err) throw err; });
+                            subscribers.setCurrentLocation(location, function (err) {
+                                if (err) throw err;
+                            });
                         });
                     }
                 });
@@ -218,24 +237,30 @@ app.post(callbackUrl, function (request, response, next) {
 
     console.log(JSON.stringify(request.body, null, 4));
     subscriberNumber = request.body.unsubscribed.subscriber_number.slice(7);
-    models.subscribers.find({subscriber_number : subscriberNumber}, function(err, subscriber){
+    models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
         subscriber.active = 0;
-    }).save(function (err) { if(err) throw err; });
+    }).save(function (err) {
+        if (err) throw err;
+    });
 });
 
 app.post(notifyUrl, function (req, res, next) {
     // Receive the sms sent by the user
-    console.log(JSON.stringify(req.body, null, 4));
-    var messageJson =  JSON.parse(req.body);
-    var message = messageJson.outboundSMSMessageRequest.outboundSMSTextMessage.message;
-    var subscriberNumber = messageJson.outboundSMSMessageRequest.address.slice(7);
-    req.models.message.create({ content: message,
-                                timestamp : new Date() }, function(err, msg){
-        if(err) throw err;
-        req.models.subscribers.find({subscriber_number : subscriberNumber}, function(err, subscriber){
-            if(err) throw err;
-            msg.setSender(subscriber, function (err) {
-                if(err) throw err;
+    var messageJson = req.body;
+    console.log(messageJson);
+    console.log(messageJson.inboundSMSMessageList);
+    var message = messageJson.inboundSMSMessageList.inboundSMSMessage[0].message;
+    var subscriberNumber = messageJson.inboundSMSMessageList.inboundSMSMessage[0].senderAddress.slice(7);
+    console.log(subscriberNumber);
+    req.models.message.create({
+        content: message,
+        timestamp: new Date()
+    }, function (err, msg) {
+        if (err) throw err;
+        req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
+            if (err) throw err;
+            msg.setSender(subscriber[0], function (err) {
+                if (err) throw err;
             });
         });
     });
