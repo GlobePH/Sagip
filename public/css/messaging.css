@@ -2,17 +2,13 @@ div {
 /*    border: solid 1px red;
 */}
 
-#page-body {
-    height: 100vh;
-}
-
 #message-thread {
-    height: 100vh;
+    height: calc(100vh - 52px);
     padding: 0;
 }
 
 #cotact-list-wrapper {
-    height: 100vh;
+    height: calc(100vh - 52px);
     padding: 20px;
     background: #ecf0f1;
 }
@@ -31,7 +27,8 @@ div {
 
 #thread-body {
     padding: 20px;
-    height: 300px;
+    height: calc(100vh - 202px);
+    overflow-y: scroll;
 }
 
 #thread-compose-message {
@@ -47,19 +44,20 @@ div {
 }
 
 .message {
-    border-radius: 10px 10px 0 10px;
     padding: 10px;
     color: white;
 }
 
 .message-admin {
+    border-radius: 10px 10px 0 10px;
     float:right;
     background: #2c3e50;
 }
 
 .message-client {
+    border-radius: 10px 10px 10px 0;
     float:left;
-    background: #34495e;
+    background: #c0392b;
 }
 
 .message-wrapper {
@@ -72,4 +70,9 @@ div {
 
 .active-contact {
     background: #bdc3c7;
+}
+
+.message-time {
+    font-size: 7pt;
+    color: #bdc3c7;
 }
