@@ -11,6 +11,13 @@ $(document).ready(function () {
     socket.on('add message', function (msg) {
         console.log(msg);
     });
+
+    $("#floating-filter").on("click", function () {
+        var checkedValues = $('input:checkbox:checked').map(function () {
+            return this.name;
+        }).get();
+        console.log(checkedValues);
+    });
 });
 
 /* MAPS Components */
