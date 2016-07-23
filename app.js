@@ -30,7 +30,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 /*
  * DB Settings
  * */
-app.use(orm.express("postgres://yabqmpwuimsxyz:F44HnoHTY7NTHHzCmMCeLp-LA_@ec2-54-243-126-40.compute-1.amazonaws.com/d4slpjm81kkp7h?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory", {
+
+app.use(orm.express("postgres://fcngqaxoxsxrkl:B3kMIWRX3670EHb88vYplWqlmw@ec2-54-243-249-56.compute-1.amazonaws.com:5432/ddbglqj7okqt1a?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory", {
     define: function (db, models, next) {
         models.subscribers = db.define("subscribers", {
             access_token: String,
@@ -40,7 +41,7 @@ app.use(orm.express("postgres://yabqmpwuimsxyz:F44HnoHTY7NTHHzCmMCeLp-LA_@ec2-54
         });
 
         models.location = db.define("location", {
-            address : String,
+            address: String,
             accuracy: String,
             altitude: String,
             latitude: String,
@@ -86,11 +87,15 @@ app.use(orm.express("postgres://yabqmpwuimsxyz:F44HnoHTY7NTHHzCmMCeLp-LA_@ec2-54
  */
 
 app.get('/', function (req, res) {
-    res.render("home", {title : "Home", showBar : true});
+    res.render("home", {title: "Home", showBar: true});
+});
+
+app.get('/test', function (req, res) {
+    io.emit('add message', "hi");
 });
 
 app.get('/messaging', function (req, res) {
-    res.render("messaging", {title : "Messaging ", showBar : false});
+    res.render("messaging", {title: "Messaging ", showBar: false});
 });
 
 /*
@@ -124,18 +129,26 @@ app.get('/locate', function (req, res) {
 app.get('/location', function (req, res) {
     var id = req.query['id'];
     req.models.location.get(id, function (err, location) {
-        console.log(location);
+        console.log(JSON.stringify(location));
         res.send(JSON.stringify({"location": location}));
     });
 });
 
 app.get('/subscribers', function (req, res) {
     var subscribers;
-    req.models.subscribers.all(function (err, subscriber) {
+    req.models.subscribers.find({active : true}).all(function (err, subscriber) {
         if (err) throw error;
         subscribers = subscriber;
         res.send(JSON.stringify({"users": subscribers}));
     });
+});
+
+app.get('/subscriber-messages', function (req, res) {
+    var senderId = req.query['subscriber_id'];
+    req.models.message.find({sender_id : senderId}.all( function (err, messages) {
+        if (err) throw error;
+        res.send(JSON.stringify({"messages": messages}));
+    }));
 });
 
 app.get('/send', function (req, res) {
@@ -173,7 +186,6 @@ app.get('/send', function (req, res) {
         })
 
     });
-
 });
 
 
@@ -193,7 +205,6 @@ function onProcessGETCallback(req, res, next) {
     var subscriberNumber = req.query['subscriber_number'];
     var accuracy = 1;
     var location_url = 'https://devapi.globelabs.com.ph/location/v1/queries/location?access_token=' + accessToken + '&address=' + subscriberNumber + '&requestedAccuracy=' + accuracy;
-    var address;
     // TODO: CHECK IF SUBSCRIBER NUMBER ALREADY EXISTS, IF YES, SIMPLY UPDATE ACCESS TOKEN,
     // AND SET IS_ACTIVE TO TRUE.
     // TODO: Subscriber should be unique
@@ -207,52 +218,54 @@ function onProcessGETCallback(req, res, next) {
             currentLocation = locationJson.terminalLocationList.terminalLocation.currentLocation;
             address_url = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + currentLocation.latitude + "," + currentLocation.longitude;
 
-            request(address_url, function(err,response, body) {
+            io.emit('add marker', currentLocation.latitude, currentLocation.longitude);
+
+            request(address_url, function (err, response, body) {
                 if (!err && response.statusCode == 200) {
                     console.log(body);
                     addressJson = JSON.parse(body);
-                    address = addressJson.results.address_components[0].formatted_address;
+                    var address = addressJson.results[0].formatted_address;
 
+
+                    req.models.location.create({
+                        address: address,
+                        accuracy: currentLocation.accuracy,
+                        altitude: currentLocation.altitude,
+                        latitude: currentLocation.latitude,
+                        longitude: currentLocation.longitude,
+                        map_url: currentLocation.map_url,
+                        timestamp: new Date()
+                    }, function (err, location) {
+                        if (err) throw err;
+
+                        req.models.subscribers.exists({subscriber_number: subscriberNumber}, function (err, exists) {
+                            if (err) throw err;
+                            if (exists) {
+                                req.models.subscribers.find({subscriber_number: subscriberNumber}).each(function (subscriber) {
+                                    subscriber.acces_token = accessToken;
+                                    subscriber.active = true;
+                                    subscriber.setCurrentLocation(location, function (err) {
+                                        if (err) throw err;
+                                    });
+                                }).save(function (err) {
+                                    if (err) throw err;
+                                });
+                            } else {
+                                req.models.subscribers.create({
+                                    access_token: accessToken,
+                                    subscriber_number: subscriberNumber,
+                                    status: "IDLE",
+                                    active: true,
+                                }, function (err, subscriber) {
+                                    if (err) throw err;
+                                    subscriber.setCurrentLocation(location, function (err) {
+                                        if (err) throw err;
+                                    });
+                                });
+                            }
+                        });
+                    });
                 }
-            });
-
-            req.models.location.create({
-                address : address,
-                accuracy: currentLocation.accuracy,
-                altitude: currentLocation.altitude,
-                latitude: currentLocation.latitude,
-                longitude: currentLocation.longitude,
-                map_url: currentLocation.map_url,
-                timestamp: new Date()
-            }, function (err, location) {
-                if (err) throw err;
-
-                req.models.subscribers.exists({subscriber_number: subscriberNumber}, function (err, exists) {
-                    if (err) throw err;
-                    if (exists) {
-                        req.models.subscribers.find({subscriber_number: subscriberNumber}).each(function (subscriber) {
-                            subscriber.acces_token = accessToken;
-                            subscriber.active = true;
-                            subscriber.setCurrentLocation(location, function (err) {
-                                if (err) throw err;
-                            });
-                        }).save(function (err) {
-                            if (err) throw err;
-                        });
-                    } else {
-                        req.models.subscribers.create({
-                            access_token: accessToken,
-                            subscriber_number: subscriberNumber,
-                            status: "IDLE",
-                            active: true,
-                        }, function (err, subscriber) {
-                            if (err) throw err;
-                            subscriber.setCurrentLocation(location, function (err) {
-                                if (err) throw err;
-                            });
-                        });
-                    }
-                });
             });
         }
     });
@@ -300,13 +313,27 @@ app.post(notifyUrl, function (req, res, next) {
 
 
 /*
- * Listener
+ * Socket.io
  */
 
-// http.listen(3000, function () {
-//     console.log('Example app listening on port 3000!');
+io.on('connection', function (socket) {
+    socket.on('chat message', function (msg) {
+        io.emit('chat message', msg);
+    });
+});
+
+/*
+ * Socket.io
+ */
+// io.on('connection', function(socket){
+//     socket.on('chat message', function(msg){
+//
+//     });
 // });
 
-http.listen(app.get('port'), function() {
+/*
+ * Listener
+ */
+http.listen(app.get('port'), function () {
     console.log('Node app is running on port', app.get('port'));
 });

@@ -1,3 +1,75 @@
 div {
-    border: solid 1px red;
+/*    border: solid 1px red;
+*/}
+
+#page-body {
+    height: 100vh;
+}
+
+#message-thread {
+    height: 100vh;
+    padding: 0;
+}
+
+#cotact-list-wrapper {
+    height: 100vh;
+    padding: 20px;
+    background: #ecf0f1;
+}
+
+#contact-list {
+    width: 100%;
+    margin: auto 0;
+}
+
+.contact {
+}
+
+#thread-title {
+    margin: 0;
+}
+
+#thread-body {
+    padding: 20px;
+    height: 300px;
+}
+
+#thread-compose-message {
+    height: 100px;
+}
+
+#compose-text {
+    width: 100%;
+}
+
+#send-msg {
+    float: right;
+}
+
+.message {
+    border-radius: 10px 10px 0 10px;
+    padding: 10px;
+    color: white;
+}
+
+.message-admin {
+    float:right;
+    background: #2c3e50;
+}
+
+.message-client {
+    float:left;
+    background: #34495e;
+}
+
+.message-wrapper {
+    padding: 2px;
+}
+
+.badge {
+    background: #c0392b;
+}
+
+.active-contact {
+    background: #bdc3c7;
 }
