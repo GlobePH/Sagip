@@ -94,8 +94,7 @@ app.get('/locate', function (req, res) {
 
     var url = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=' + origins + '&destinations=' + destinations + '&key=AIzaSyBKKTvirqm2LvwZaPD6ymCF5QS_oHueYfg';
     request(url, function (error, response, body) {
-        console.log(body);
-        res.send({"data": body});
+        res.send({"data": JSON.parse(body)});
     });
 
 });
