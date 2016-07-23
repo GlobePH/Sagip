@@ -33,8 +33,8 @@ function getLocations() {
         var locations = $.parseJSON(data).locations;
 
         for(var i=0; i<locations.length; i++) {
-            var location = "<li class='location list-group-item'>" +
-                "<input type='checkbox'/>&nbsp; " + locations[i].name + "</li>";
+            var location = "<div class='location col-md-3'><div class='location-card'>" +
+                "<input type='checkbox'/>&nbsp; " + locations[i].name + "</div></div>";
             $('#location-list').append(location);
         }
 

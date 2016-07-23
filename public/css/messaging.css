@@ -85,3 +85,7 @@ div {
     font-size: 7pt;
     color: #bdc3c7;
 }
+
+.location-card {
+    border: solid 1px #ecf0f1;
+}
