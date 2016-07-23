@@ -60,11 +60,14 @@ app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
         });
 
         models.message = db.define("message", {
-            content: String
+            content: String,
+            timestamp : Date
         });
 
         models.subscribers.hasOne('currentLocation', models.location);
         models.subscribers.hasOne('baseLocation', models.location);
+
+        models.message.hasOne('sender', models.subscriber, {reverse : "messages"});
 
         models.user.hasOne("organization", models.organization);
 
@@ -134,7 +137,6 @@ function onProcessGETCallback(req, res, next) {
     var accuracy = 1;
     var location_url = 'https://devapi.globelabs.com.ph/location/v1/queries/location?access_token=' + accessToken + '&address=' + subscriberNumber + '&requestedAccuracy=' + accuracy;
 
-    // TODO: Save subscriber isntance here (Jason)
     // TODO: Refactor (Roselle)
 
     request(location_url, function (err, response, body) {
@@ -180,8 +182,19 @@ app.post(callbackUrl, function (request, response, next) {
 app.post(notifyUrl, function (req, res, next) {
     // Receive the sms sent by the user
     console.log(JSON.stringify(req.body, null, 4));
-
-    // TODO: SAVE MESSAGE HERE
+    var messageJson =  JSON.parse(req.body);
+    var message = messageJson.outboundSMSMessageRequest.outboundSMSTextMessage.message;
+    var subscriberNumber = messageJson.outboundSMSMessageRequest.address.slice(7);
+    req.models.message.create({ content: message,
+                                timestamp : new Date() }, function(err, msg){
+        if(err) throw err;
+        req.models.subscribers.find({subscriber_number : subscriberNumber}, function(err, subscriber){
+            if(err) throw err;
+            msg.setSender(subscriber, function (err) {
+                if(err) throw err;
+            });
+        });
+    });
 
     res.send(JSON.stringify(req.body, null, 4));
 });
