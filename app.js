@@ -136,6 +136,7 @@ app.get('/location', function (req, res) {
 
 app.get('/subscribers', function (req, res) {
     var subscribers;
+    console.log("filter = " + req.query['filter']);
     req.models.subscribers.find({active : true}).all(function (err, subscriber) {
         if (err) throw error;
         subscribers = subscriber;
@@ -145,10 +146,10 @@ app.get('/subscribers', function (req, res) {
 
 app.get('/subscriber-messages', function (req, res) {
     var senderId = req.query['subscriber_id'];
-    req.models.message.find({sender_id : senderId}.all( function (err, messages) {
+    req.models.message.find({sender_id : senderId}).all( function (err, messages) {
         if (err) throw error;
         res.send(JSON.stringify({"messages": messages}));
-    }));
+    });
 });
 
 app.get('/send', function (req, res) {

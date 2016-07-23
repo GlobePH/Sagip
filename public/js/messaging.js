@@ -39,6 +39,7 @@ function selectContact(element) {
     $('#thread-title h4').html(contacts[index].subscriber_number);
 
     var url = '/subscriber-messages?subscriber_id=' + contacts[index].id;
+    console.log(url);
     $.get(url, function (data){
         console.log(data);
     });
