@@ -4,6 +4,9 @@
 <div class="col-md-12" id="messaging-panel">
 
     <div class="col-sm-3" id="cotact-list-wrapper">
+        <div>
+        <button id="create-new-message" class="btn btn-primary" data-toggle="modal" data-target="#new-message-modal">New Message</button>
+        </div>
         <ul id="contact-list" class="list-group">
         </ul>
     </div>
@@ -11,8 +14,8 @@
     <div class="col-sm-9" id="message-thread">
 
         <div class="col-sm-12 page-header" id="thread-title">
-            <h4></h4>
-            <p>Lorem Ipsum</p>
+            <h4>Welcome!</h4>
+            <p>This service is made available by Globe.</p>
         </div>
 
         <div class="col-sm-12" id="thread-body">
@@ -24,4 +27,24 @@
         </div>
     </div>
 
+</div>
+
+<div class="modal fade" id="new-message-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="modal-title">Create New Message Group</h4>
+            </div>
+            <div class="modal-body">
+                <ul id="location-list" class="list-group">
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary">Send</button>
+            </div>
+        </div>
+    </div>
 </div>

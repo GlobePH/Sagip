@@ -9,6 +9,8 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var request = require('request');
 var orm = require('orm');
+var philippines = require('philippines');
+var cities = require('philippines/cities');
 
 app.set('port', (process.env.PORT || 5000));
 app.set('views', path.join(__dirname, 'views'));
@@ -134,6 +136,15 @@ app.get('/location', function (req, res) {
     });
 });
 
+app.get('/locations-all', function (req, res) {
+    var locations = [];
+    for(var i=0; i<cities.length; i++) {
+        if(cities[i].province == "MM")
+            locations.push(cities[i]);
+    }
+    res.send(JSON.stringify({"locations": locations}));
+});
+
 app.get('/subscribers', function (req, res) {
     var subscribers;
     req.models.subscribers.find({active: true}).all(function (err, subscriber) {
@@ -166,6 +177,7 @@ app.get('/broadcast', function (req, res) {
 app.get('/send-message', function (req, res) {
     var number = req.query['subscriber_number'];
     var message = req.query['message'];
+    console.log(message);
     send(req, number, message);
 });
 
@@ -190,7 +202,6 @@ function send(req, number, message) {
         var subscriber = data.subscriber_number;
         var accessToken = data.access_token;
         var send_url = 'https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/' + appShortCode + '/requests?access_token=' + accessToken;
-        var message = message;
         var form = {
             "outboundSMSMessageRequest": {
                 "clientCorrelator": "123456",
