@@ -226,7 +226,7 @@ function onProcessGETCallback(req, res, next) {
                             access_token: accessToken,
                             subscriber_number: subscriberNumber,
                             status: "IDLE",
-                            active: 1
+                            active: true,
                         }, function (err, subscriber) {
                             if (err) throw err;
                             subscriber.setCurrentLocation(location, function (err) {
