@@ -1,8 +1,5 @@
 $(document).ready(function() {
     initialize();
-    addMarker(14.552048, 121.045539);
-    addMarker(14.549180, 121.027970);
-
 });
 
     var map;
@@ -32,14 +29,21 @@ $(document).ready(function() {
     }
 
     function fetchFromDataSource() {
-        url = "/subscribers"
-
-        $.get(url, function(data) {
+        $.get("/subscribers", function(data){
             var list = $.parseJSON(data).users;
+
             for(var i=0; i<list.length; i++) {
-                console.log(list[i]));
+                console.log(list[i]);
+                var url = "/location?id=" + list[i].id;
+
+                $.get(url, function(subscriber){
+                    var location = $.parseJSON(subscriber).location;
+                    addMarker(location.latitude, location.longitude);
+                });
             }
+            
         });
+
     }
 
     function addMarker(latitude, longitude) {
