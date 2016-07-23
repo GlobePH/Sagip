@@ -84,24 +84,24 @@
     <div id="floating-filter">
         <h3>Filter</h3>
         <div class="checkbox">
-            <input id="checkbox" type="checkbox">
+            <!--<input id="checkbox" type="checkbox">-->
             <label for="checkbox">Subscribers</label>
         </div>
         <div class="subscriber-filter">
-            <div class="checkbox">
-                <input id="saved" type="checkbox">
+            <div class="radio">
+                <input id="saved" name="filter" type="radio" value="saved">
                 <label for="saved">Saved</label>
             </div>
-            <div class="checkbox">
-                <input id="inDanger" type="checkbox">
-                <label for="inDanger">In Danger</label>
+            <div class="radio">
+                <input id="indanger" name="filter" type="radio" value="indanger">
+                <label for="indanger">In Danger</label>
             </div>
-            <div class="checkbox">
-                <input id="marked" type="checkbox">
+            <div class="radio">
+                <input id="marked" name="filter" type="radio" value="marked">
                 <label for="marked">Marked</label>
             </div>
-            <div class="checkbox">
-                <input id="idle" type="checkbox">
+            <div class="radio">
+                <input id="idle" name="filter" type="radio" value="idle">
                 <label for="idle">Idle</label>
             </div>
         </div>

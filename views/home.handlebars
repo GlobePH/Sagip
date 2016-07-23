@@ -6,3 +6,30 @@
 <div id="map-container">
 
 </div>
+<button id="create-new-message" class="btn btn-primary" data-toggle="modal" data-target="#new-message-modal">New Message</button>
+
+<div class="modal fade" id="get-victim-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="location-list" class="row">
+                    <div class="col-sm-12" id="group-msg-options">
+                        <input type="checkbox" id="select-all-group"/>
+                        <label for="select-all-group">Select All</label>
+                    </div>
+                    <div class="col-sm-12" id="location-list-content">
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
