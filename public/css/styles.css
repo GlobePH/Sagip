@@ -1,6 +1,6 @@
-@import url('http://fonts.googleapis.com/css?family=Lato');
-@import url('http://fonts.googleapis.com/css?family=Pacifico');
-@import url('http://fonts.googleapis.com/css?family=Roboto');
+@import url('https://fonts.googleapis.com/css?family=Lato');
+@import url('https://fonts.googleapis.com/css?family=Pacifico');
+@import url('https://fonts.googleapis.com/css?family=Roboto');
 
 .list-group-item span {
     float: right;
@@ -186,11 +186,11 @@ body {
     line-height: 56px;
 }
 
-#sidebar-wrapper>ul>li>.brand>a:hover {
+#sidebar-wrapper > ul > li > .brand > a:hover {
     border: none;
 }
 
- #wrapper {
+#wrapper {
     padding-left: 0;
     -webkit-transition: all 0.5s ease;
     -moz-transition: all 0.5s ease;
@@ -206,7 +206,7 @@ body {
 
 #sidebar-wrapper {
     z-index: 1000;
-    position: absolute; 
+    position: absolute;
     left: 250px;
     width: 0;
     height: 100%;
@@ -219,25 +219,27 @@ body {
     -o-transition: all 0.5s ease;
     transition: all 0.5s ease;
 }
+
 #wrapper.toggled #sidebar-wrapper {
     width: 250px;
 }
 
 #page-content-wrapper {
     position: absolute;
-    width: 100%;  
-    overflow-x: hidden; 
+    width: 100%;
+    overflow-x: hidden;
 }
 
-.main-content{
+.main-content {
     min-width: 360px;
 }
 
 #wrapper.toggled #page-content-wrapper {
     position: relative;
-    margin-right: 0px; 
+    margin-right: 0px;
 }
-.fixed-brand{
+
+.fixed-brand {
     width: auto;
 }
 
@@ -271,7 +273,7 @@ body {
 .sidebar-nav li a:hover {
     text-decoration: none;
     color: #fff;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     border-left: #e84c3c 2px solid;
 }
 
@@ -280,12 +282,11 @@ body {
     text-decoration: none;
 }
 
-#sidebar-wrapper>li.active>a, #sidebar-wrapper>li.active>a:focus, #sidebar-wrapper>li.active>a:hover {
+#sidebar-wrapper > li.active > a, #sidebar-wrapper > li.active > a:focus, #sidebar-wrapper > li.active > a:hover {
     background-color: #282828;
 }
 
-#sidebar-wrapper>li
-
+#sidebar-wrapper > li
 .sidebar-nav > .sidebar-brand {
     height: 65px;
     font-size: 18px;
@@ -301,8 +302,8 @@ body {
     background: none;
 }
 
-.no-margin{
-    margin:0;
+.no-margin {
+    margin: 0;
 }
 
 .no-top-bottom-margin {
@@ -310,13 +311,15 @@ body {
     margin-bottom: 0;
 }
 
-@media(min-width:768px) {
+@media (min-width: 768px) {
     #wrapper {
         padding-left: 250px;
     }
-    .fixed-brand{
+
+    .fixed-brand {
         width: 250px;
     }
+
     #wrapper.toggled {
         padding-left: 0;
     }
@@ -328,13 +331,14 @@ body {
     #wrapper.toggled #sidebar-wrapper {
         width: 250px;
     }
+
     #wrapper.toggled-2 #sidebar-wrapper {
         width: 50px;
     }
+
     #wrapper.toggled-2 #sidebar-wrapper:hover {
         width: 250px;
     }
-
 
     #page-content-wrapper {
         position: relative;
@@ -349,6 +353,7 @@ body {
         margin-right: 0;
         padding-left: 250px;
     }
+
     #wrapper.toggled-2 #page-content-wrapper {
         position: relative;
         margin-right: 0;
