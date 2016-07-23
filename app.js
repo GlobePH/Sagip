@@ -145,10 +145,10 @@ app.get('/subscribers', function (req, res) {
 
 app.get('/subscriber-messages', function (req, res) {
     var senderId = req.query['subscriber_id'];
-    req.models.message.find({sender_id : senderId}.all( function (err, messages) {
+    req.models.message.find({sender_id : senderId}).all( function (err, messages) {
         if (err) throw error;
-        res.send(JSON.stringify({"users": messages}));
-    }));
+        res.send(JSON.stringify({"messages": messages}));
+    });
 });
 
 app.get('/send', function (req, res) {
