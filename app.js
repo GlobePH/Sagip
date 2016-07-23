@@ -146,11 +146,11 @@ app.get('/locations', function (req, res) {
      * */
     var id = req.query['id'];
     if (id) {
-        req.models.locations.get(id, function (err, locations) {
+        req.models.location.get(id, function (err, locations) {
             res.send(JSON.stringify({"locations": locations}));
         });
     } else {
-        req.models.locations.all(function (err, locations) {
+        req.models.location.all(function (err, locations) {
             res.send(JSON.stringify({"locations": locations}));
         });
     }
@@ -320,7 +320,7 @@ function onProcessGETCallback(req, res, next) {
                     var address = addressJson.results[0].formatted_address;
 
 
-                    req.models.locations.create({
+                    req.models.location.create({
                         address: address,
                         accuracy: currentLocation.accuracy,
                         altitude: currentLocation.altitude,
