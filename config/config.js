@@ -6,7 +6,9 @@ exports.appId = 'djd9H6bA76CG5Tj7zriAXnCGzj4LH68z'; // application id
 exports.appSecret = '874841e787fe889888dbd6d36cf1e99e41c2ffb833fea71f71171f0d45f7ed44'; // application secret
 exports.callbackUrl = '/callback';
 exports.notifyUrl = '/sms';
-exports.database_url = 'postgres://fcngqaxoxsxrkl:B3kMIWRX3670EHb88vYplWqlmw@ec2-54-243-249-56.compute-1.amazonaws.com:5432/ddbglqj7okqt1a?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory';
+
+var params = '?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory';
+exports.database_url = 'postgres://kxedkdjhlvemzg:AzFP0H0DB-uoCuJaxR4lme8BFq@ec2-54-243-200-63.compute-1.amazonaws.com:5432/d2sk2nbcgq8sju' + params;
 
 exports.cors = function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
