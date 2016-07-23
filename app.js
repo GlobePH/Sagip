@@ -165,7 +165,22 @@ app.get('/send', function (req, res) {
 
 });
 
+function sendBulk(req, data) {
+    /*
+     * Send SMS to an array of subscribers
+     * */
+    console.log("sending");
+    for (var i = 0; i < data.length; i++) {
+        console.log("before single send");
+        console.log(data[i].subscriber_number);
+        send(req, data[i].subscriber_number);
+    }
+}
+
 function send(req, number) {
+    /*
+     * Send sms to a single number
+     * */
     req.models.subscribers.find({subscriber_number: number}, function (err, data) {
         data = data[0];
         var subscriber = data.subscriber_number;
@@ -197,14 +212,6 @@ function send(req, number) {
     });
 }
 
-function sendBulk(req, data) {
-    console.log("sending");
-    for (var i = 0; i < data.length; i++) {
-        console.log("before single send");
-        console.log(data[i].subscriber_number);
-        send(req, data[i].subscriber_number);
-    }
-}
 
 /*
  * Globe API
