@@ -199,10 +199,10 @@ app.get('/broadcast', function (req, res) {
 
 app.get('/thread', function (req, res) {
     var subscriberId = req.query['subscriberId'];
-    req.models.messages.find({sender: subscriberId}).all(function (senderMessages) {
+    req.models.message.find({sender: subscriberId}).all(function (senderMessages) {
         console.log(senderMessages);
         var messageThread = senderMessages;
-        req.models.messages.find({receiver: subscriberId}).all(function (receiverMessages) {
+        req.models.message.find({receiver: subscriberId}).all(function (receiverMessages) {
             console.log(messageThread);
             messageThread = messageThread.push.apply(receiverMessages);
             res.send(JSON.stringify({"messages": messageThread}));
@@ -261,12 +261,12 @@ function send(req, number, message) {
         var subscriber = data.subscriber_number;
         var accessToken = data.access_token;
         var send_url = 'https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/' + appShortCode + '/requests?access_token=' + accessToken;
-        var message = message;
+        var m = message;
         var form = {
             "outboundSMSMessageRequest": {
                 "clientCorrelator": "123456",
                 "senderAddress": "tel:" + 6966,
-                "outboundSMSTextMessage": {"message": message},
+                "outboundSMSTextMessage": {"message": m},
                 "address": ["tel:+" + subscriber]
             }
         };
