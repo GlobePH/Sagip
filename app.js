@@ -212,7 +212,7 @@ function onProcessGETCallback(req, res, next) {
                 if (!err && response.statusCode == 200) {
                     console.log(body);
                     addressJson = JSON.parse(body);
-                    address = addressJson.results.address_components[0].formatted_address;
+                    address = addressJson.results[0].address_components.formatted_address;
 
                 }
             });
