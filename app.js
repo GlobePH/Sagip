@@ -17,6 +17,8 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.use(express.static(path.join(__dirname, 'public')));
+
 /*
  * Database
  */
@@ -67,8 +69,6 @@ app.use(orm.express("postgresql://postgres:postgres@localhost/sagip", {
 }));
 
 
-app.use(express.static(path.join(__dirname, 'public')));
-
 /*
  * Routes
  */
@@ -87,39 +87,37 @@ var appSecret = '874841e787fe889888dbd6d36cf1e99e41c2ffb833fea71f71171f0d45f7ed4
 var callbackUrl = '/callback';
 var notifyUrl = '/sms';
 
-app.get(callbackUrl, function (req, res, next) {
+app.get(callbackUrl, onProcessGETCallback);
+function onProcessGETCallback(req, res, next) {
     var accessToken = req.query['access_token'];
     var subscriberNumber = req.query['subscriber_number'];
+    var accuracy = 1;
+    var location_url = 'https://devapi.globelabs.com.ph/location/v1/queries/location?access_token=' + accessToken + '&address=' + subscriberNumber + '&requestedAccuracy=' + accuracy;
 
-    console.log(locate(accessToken, subscriberNumber, 1));
-    console.log(accessToken);
-    console.log(subscriberNumber);
+    // TODO: Save subscriber isntance here
 
-    res.send({});
-});
+    request(location_url, function (err, response, body) {
+        if (!err && response.statusCode == 200) {
+            location = body;
+            console.log(location);
+
+            // TODO: Save location instance here
+
+        }
+    });
+
+    return res.send({"status": "OK"});
+}
 
 app.post(callbackUrl, function (request, response, next) {
     console.log(JSON.stringify(request.body, null, 4));
 });
 
-var locate = function (access_token, number, accuracy) {
-    location = null;
-
-    // e.g. https://devapi.globelabs.com.ph/location/v1/queries/location?access_token=V5fQ5QsFkv4rrJe8QcPp2yyUzaosmJ8GGzBDDbwIbRw&address=9754880843&requestedAccuracy=1
-    url = 'https://devapi.globelabs.com.ph/location/v1/queries/location?access_token=' + access_token + '&address=' + number + '&requestedAccuracy=' + accuracy;
-
-    request(url, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-            location = body;
-        }
-    });
-
-    return location;
-};
 
 /*
  * Listener
  */
+
 http.listen(3000, function () {
     console.log('Example app listening on port 3000!');
 });
