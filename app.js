@@ -9,6 +9,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var request = require('request');
 var orm = require('orm');
+var request = require('request');
 
 app.set('views', path.join(__dirname, 'views'));
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
@@ -105,7 +106,36 @@ app.get('/send', function (req, res) {
      * @param subscriber = where to send the msg
      * @param accessToken = at of subscriber
      * */
-    res.send({"status": "ok"});
+    req.models.subscribers.find({subscriber_number: "9754880843"}, function (err, data) {
+        data = data[1];
+
+        var subscriber = data.subscriber_number;
+        var accessToken = data.access_token;
+        var send_url = 'https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/' + appShortCode + '/requests?access_token=' + accessToken;
+        var data = {
+            "outboundSMSMessageRequest": {
+                "clientCorrelator": "123456",
+                "senderAddress": "tel:" + 6966,
+                "outboundSMSTextMessage": {"message": "Hello World"},
+                "address": ["tel:+" + subscriber]
+            }
+        };
+
+        var options = {
+            url: send_url,
+            form: data
+        };
+
+        request.post(options, function (error, response, body) {
+            console.log(body);
+            if (!error && response.statusCode == 200) {
+                console.log(body); // Show the HTML for the Google homepage.
+                res.send({"status": "ok", "message": body});
+            }
+        })
+
+    });
+
 });
 
 /*
@@ -125,9 +155,9 @@ function onProcessGETCallback(req, res, next) {
     var accuracy = 1;
     var location_url = 'https://devapi.globelabs.com.ph/location/v1/queries/location?access_token=' + accessToken + '&address=' + subscriberNumber + '&requestedAccuracy=' + accuracy;
 
-    // TODO: Save subscriber isntance here (Jason)
-    // TODO: Refactor (Roselle)
-
+    // TODO: CHECK IF SUBSCRIBER NUMBER ALREADY EXISTS, IF YES, SIMPLY UPDATE ACCESS TOKEN,
+    // AND SET IS_ACTIVE TO TRUE.
+    // TODO: Subscriber should be unique
     request(location_url, function (err, response, body) {
         if (!err && response.statusCode == 200) {
             console.log(body);
@@ -165,6 +195,8 @@ function onProcessGETCallback(req, res, next) {
 }
 
 app.post(callbackUrl, function (request, response, next) {
+    // TODO: Upon unsubscribing, mark the subscriber as inactive
+
     console.log(JSON.stringify(request.body, null, 4));
 });
 
