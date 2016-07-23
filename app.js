@@ -90,6 +90,10 @@ app.get('/', function (req, res) {
     res.render("home", {title: "Home", showBar: true});
 });
 
+app.get('/test', function (req, res) {
+    io.emit('add message', "hi");
+});
+
 app.get('/messaging', function (req, res) {
     res.render("messaging", {title: "Messaging ", showBar: false});
 });

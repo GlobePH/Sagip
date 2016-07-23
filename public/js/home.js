@@ -1,12 +1,16 @@
 $(document).ready(function () {
+    initializeMenu();
+    initializeMap();
+
     var socket = io();
 
     socket.on('add marker', function (lat, lng) {
         addMarker(lat, lng);
     });
 
-    initializeMenu();
-    initializeMap();
+    socket.on('add message', function (msg) {
+        console.log(msg);
+    });
 });
 
 /* MAPS Components */
