@@ -2,6 +2,9 @@ var express = require('express');
 var path = require('path');
 var exphbs = require('express-handlebars');
 var app = express();
+var logger = require('morgan');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var request = require('request');
@@ -17,6 +20,10 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 /*
@@ -93,6 +100,14 @@ app.get('/users', function (req, res) {
     res.send(JSON.stringify({"users": users}));
 });
 
+app.get('/send', function (req, res) {
+    /*Send the sms message to notify url via GET to text subscriber
+     * @param subscriber = where to send the msg
+     * @param accessToken = at of subscriber
+     * */
+    res.send({"status": "ok"});
+});
+
 /*
  * Globe API
  * */
@@ -115,26 +130,31 @@ function onProcessGETCallback(req, res, next) {
 
     request(location_url, function (err, response, body) {
         if (!err && response.statusCode == 200) {
-            locationJson = body;
-            console.log(locationJson);
+            console.log(body);
+            locationJson = JSON.parse(body);
+            console.log(locationJson.terminalLocationList);
 
             currentLocation = locationJson.terminalLocationList.terminalLocation.currentLocation;
-            req.models.location.create({accuracy : currentLocation.accuracy,
-                                        altitude : currentLocation.altitude,
-                                        latitude : currentLocation.latitude,
-                                        longitude : currentLocation.longitude,
-                                        map_url : currentLocation.map_url,
-                                        timestamp : new Date() }, function (err, location) {
+            req.models.location.create({
+                accuracy: currentLocation.accuracy,
+                altitude: currentLocation.altitude,
+                latitude: currentLocation.latitude,
+                longitude: currentLocation.longitude,
+                map_url: currentLocation.map_url,
+                timestamp: new Date()
+            }, function (err, location) {
                 if (err) throw err;
 
-                req.models.subscribers.create({access_token : accessToken,
-                                                subscriber_number : subscriberNumber,
-                                                status : "IDLE",
-                                                active : 1} , function(err, subscribers) {
+                req.models.subscribers.create({
+                    access_token: accessToken,
+                    subscriber_number: subscriberNumber,
+                    status: "IDLE",
+                    active: 1
+                }, function (err, subscribers) {
                     if (err) throw err;
 
                     subscribers.setCurrentLocation(location, function (err) {
-                        if(err) throw err;
+                        if (err) throw err;
                     });
                 });
             });
@@ -148,13 +168,14 @@ app.post(callbackUrl, function (request, response, next) {
     console.log(JSON.stringify(request.body, null, 4));
 });
 
-app.post(notifyUrl, function(request, response, next) {
-    // Express Framework automatically parse the post data
+app.post(notifyUrl, function (req, res, next) {
+    // Receive the sms sent by the user
+    console.log(JSON.stringify(req.body, null, 4));
 
-    // Sends the data as JSON
-    response.end(JSON.stringify(request.body, null, 4));
+    // TODO: SAVE MESSAGE HERE
+
+    res.send(JSON.stringify(req.body, null, 4));
 });
-
 
 
 /*
