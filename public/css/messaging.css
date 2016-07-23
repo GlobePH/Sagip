@@ -1,14 +1,19 @@
 div {
-/*    border: solid 1px red;
-*/}
+    border: solid 1px red;
+}
+
+#messaging-panel {
+    background: yellow;
+    height: calc(100vh - 52px);
+}
 
 #message-thread {
-    height: calc(100vh - 52px);
+    height: 100%;
     padding: 0;
 }
 
 #cotact-list-wrapper {
-    height: calc(100vh - 52px);
+    height: 100%;
     padding: 20px;
     background: #ecf0f1;
 }
@@ -32,7 +37,7 @@ div {
 }
 
 #thread-compose-message {
-    height: 100px;
+    height: 150px;
 }
 
 #compose-text {
