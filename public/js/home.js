@@ -54,10 +54,10 @@ $(document).ready(function() {
     }
 
     function getDetails(dest_latitude, dest_longitude) {
-        var url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial" +
-                "&origins=" + dest_latitude + "," + dest_longitude +
-                "&destinations=" + dest_latitude + "," + dest_longitude;
-
+        // var url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial" +
+        //         "&origins=" + dest_latitude + "," + dest_longitude +
+        //         "&destinations=" + dest_latitude + "," + dest_longitude;
+        var url = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=Washington,DC&destinations=New+York+City,NY&key=AIzaSyBKKTvirqm2LvwZaPD6ymCF5QS_oHueYfg';
 //        var url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=Washington,DC&destinations=New+York+City,NY&key=AIzaSyBYETwsOAvux9A4kk8Zz4ow2ptx5NCW058";
 
         $.get(url, function(data) {

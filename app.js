@@ -84,7 +84,21 @@ app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
  */
 
 app.get('/', function (req, res) {
-    res.render('home', {title : "Home"});
+    console.log('HI');
+
+});
+
+app.get('/locate', function (req, res) {
+    var units = req.query['units'];
+    var origins = req.query['origins'];
+    var destinations = req.query['destinations'];
+
+    var url = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=' + origins + '&destinations=' + destinations + '&key=AIzaSyBKKTvirqm2LvwZaPD6ymCF5QS_oHueYfg';
+    request(url, function (error, response, body) {
+        console.log(body);
+        res.send({"data": body});
+    });
+
 });
 
 /*
@@ -187,14 +201,18 @@ function onProcessGETCallback(req, res, next) {
             }, function (err, location) {
                 if (err) throw err;
 
-                req.models.subscribers.exists({subscriber_number : subscriberNumber}, function (err, exists) {
-                    if(err) throw err;
-                    if(exists) {
-                        req.models.subscribers.find({subscriber_number : subscriberNumber}, function (err, subscriber) {
+                req.models.subscribers.exists({subscriber_number: subscriberNumber}, function (err, exists) {
+                    if (err) throw err;
+                    if (exists) {
+                        req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
                             subscriber.acces_token = accessToken;
                             subscriber.active = 1;
-                            subscribers.setCurrentLocation(location, function (err) { if (err) throw err; });
-                        }).save(function (err) { if(err) throw err; });
+                            subscribers.setCurrentLocation(location, function (err) {
+                                if (err) throw err;
+                            });
+                        }).save(function (err) {
+                            if (err) throw err;
+                        });
                     } else {
                         req.models.subscribers.create({
                             access_token: accessToken,
@@ -203,7 +221,9 @@ function onProcessGETCallback(req, res, next) {
                             active: 1
                         }, function (err, subscribers) {
                             if (err) throw err;
-                            subscribers.setCurrentLocation(location, function (err) { if (err) throw err; });
+                            subscribers.setCurrentLocation(location, function (err) {
+                                if (err) throw err;
+                            });
                         });
                     }
                 });
@@ -218,9 +238,11 @@ app.post(callbackUrl, function (request, response, next) {
 
     console.log(JSON.stringify(request.body, null, 4));
     subscriberNumber = request.body.unsubscribed.subscriber_number.slice(7);
-    models.subscribers.find({subscriber_number : subscriberNumber}, function(err, subscriber){
+    models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
         subscriber.active = 0;
-    }).save(function (err) { if(err) throw err; });
+    }).save(function (err) {
+        if (err) throw err;
+    });
 });
 
 app.post(notifyUrl, function (req, res, next) {
