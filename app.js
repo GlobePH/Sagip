@@ -115,6 +115,14 @@ app.get('/users', function (req, res) {
     });
 });
 
+app.get('/location', function (req, res) {
+    var id = req.query['id'];
+    req.models.location.get(id, function (err, location) {
+        console.log(location);
+        res.send(JSON.stringify({"location": location}));
+    });
+});
+
 app.get('/subscribers', function (req, res) {
     var subscribers;
     req.models.subscribers.all(function (err, subscriber) {
@@ -135,11 +143,12 @@ app.get('/send', function (req, res) {
         var subscriber = data.subscriber_number;
         var accessToken = data.access_token;
         var send_url = 'https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/' + appShortCode + '/requests?access_token=' + accessToken;
+        var message = "Hello";
         var data = {
             "outboundSMSMessageRequest": {
                 "clientCorrelator": "123456",
                 "senderAddress": "tel:" + 6966,
-                "outboundSMSTextMessage": {"message": "Hello World"},
+                "outboundSMSTextMessage": {"message": message},
                 "address": ["tel:+" + subscriber]
             }
         };
@@ -202,10 +211,10 @@ function onProcessGETCallback(req, res, next) {
                 req.models.subscribers.exists({subscriber_number: subscriberNumber}, function (err, exists) {
                     if (err) throw err;
                     if (exists) {
-                        req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
+                        req.models.subscribers.find({subscriber_number: subscriberNumber}).each(function (subscriber) {
                             subscriber.acces_token = accessToken;
                             subscriber.active = 1;
-                            subscribers.setCurrentLocation(location, function (err) {
+                            subscriber.setCurrentLocation(location, function (err) {
                                 if (err) throw err;
                             });
                         }).save(function (err) {
@@ -217,9 +226,9 @@ function onProcessGETCallback(req, res, next) {
                             subscriber_number: subscriberNumber,
                             status: "IDLE",
                             active: 1
-                        }, function (err, subscribers) {
+                        }, function (err, subscriber) {
                             if (err) throw err;
-                            subscribers.setCurrentLocation(location, function (err) {
+                            subscriber.setCurrentLocation(location, function (err) {
                                 if (err) throw err;
                             });
                         });
@@ -235,8 +244,11 @@ function onProcessGETCallback(req, res, next) {
 app.post(callbackUrl, function (request, response, next) {
 
     console.log(JSON.stringify(request.body, null, 4));
-    subscriberNumber = request.body.unsubscribed.subscriber_number.slice(7);
-    models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
+    subscriberNumber = request.body.unsubscribed.subscriber_number;
+    console.log(subscriberNumber);
+    request.models.subscribers.find({subscriber_number: subscriberNumber}).each(function (subscriber) {
+        console.log("SAVINGGG");
+        console.log(subscriber);
         subscriber.active = 0;
     }).save(function (err) {
         if (err) throw err;
