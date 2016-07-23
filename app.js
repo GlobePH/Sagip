@@ -20,40 +20,40 @@ app.use(function (req, res, next) {
 app.use(express.static(path.join(__dirname, 'public')));
 
 /*
- * Database
- */
-app.use(orm.express("postgresql://postgres:postgres@localhost/sagip", {
+ * DB Settings
+ * */
+app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
     define: function (db, models, next) {
         models.subscribers = db.define("subscribers", {
-            access_token : String,
-            subscriber_number : String,
-            status : String,
-            active : Boolean
+            access_token: String,
+            subscriber_number: String,
+            status: String,
+            active: Boolean
         });
 
         models.location = db.define("location", {
-            accuracy : String,
-            altitude : String,
-            latitude : String,
-            longitude : String,
-            map_url : String,
-            timestamp : Date
+            accuracy: String,
+            altitude: String,
+            latitude: String,
+            longitude: String,
+            map_url: String,
+            timestamp: Date
         });
 
         models.organization = db.define("organization", {
-            name : String
+            name: String
         });
 
         models.user = db.define("user", {
-            user_name : String,
-            password : String,
-            access_token : String,
-            subscriber_number : String,
-            admin : Boolean
+            user_name: String,
+            password: String,
+            access_token: String,
+            subscriber_number: String,
+            admin: Boolean
         });
 
         models.message = db.define("message", {
-            content : String
+            content: String
         });
 
         models.subscribers.hasOne('currentLocation', models.location);
@@ -61,8 +61,8 @@ app.use(orm.express("postgresql://postgres:postgres@localhost/sagip", {
 
         models.user.hasOne("organization", models.organization);
 
-        db.sync(function(err) {
-            if(err) throw err;
+        db.sync(function (err) {
+            if (err) throw err;
         });
         next();
     }
@@ -70,11 +70,23 @@ app.use(orm.express("postgresql://postgres:postgres@localhost/sagip", {
 
 
 /*
- * Routes
+ * Basic Routes
  */
 
 app.get('/', function (req, res) {
     res.send('Hello World!');
+});
+
+/*
+ * Sagip API
+ * */
+app.get('/users', function (req, res) {
+    /*
+     * @param filter: Filter users by subscribers / rescuers
+     * */
+    // TODO: Query all subscribers and rescuers here...
+    var users = [];
+    res.send(JSON.stringify({"users": users}));
 });
 
 /*
@@ -94,7 +106,8 @@ function onProcessGETCallback(req, res, next) {
     var accuracy = 1;
     var location_url = 'https://devapi.globelabs.com.ph/location/v1/queries/location?access_token=' + accessToken + '&address=' + subscriberNumber + '&requestedAccuracy=' + accuracy;
 
-    // TODO: Save subscriber isntance here
+    // TODO: Save subscriber isntance here (Jason)
+    // TODO: Refactor (Roselle)
 
     request(location_url, function (err, response, body) {
         if (!err && response.statusCode == 200) {
