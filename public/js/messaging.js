@@ -79,7 +79,7 @@ function selectContact(element) {
 
     $.get(loc_url, function (data) {
         console.log(data);
-        var location = $.parseJSON(data).location;
+        var location = $.parseJSON(data).locations;
         var latitude = location.latitude;
         var longitude = location.longitude;
 
