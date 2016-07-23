@@ -84,9 +84,22 @@ app.get('/users', function (req, res) {
     /*
      * @param filter: Filter users by subscribers / rescuers
      * */
-    // TODO: Query all subscribers and rescuers here...
-    var users = [];
-    res.send(JSON.stringify({"users": users}));
+    //
+    var users;
+    req.models.users.all(function(err, user) {
+        if(err) throw error;
+        users = user;
+        res.send(JSON.stringify({"users": users}));
+    });
+});
+
+app.get('/subscribers', function (req, res) {
+    var subscribers;
+    req.models.subscribers.all(function(err, subscriber) {
+        if(err) throw error;
+        subscribers = subscriber;
+        res.send(JSON.stringify({"users": subscribers}));
+    });
 });
 
 /*
