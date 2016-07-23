@@ -92,7 +92,7 @@ function addMarker(latitude, longitude, icon, subscriberNumber) {
     var marker = new google.maps.Marker({
         position: location,
         map: map,
-        icon: '../img/markers/' + icon
+        icon: '/img/markers/' + icon
     });
 
     var subscriber = {subscriberNumber : subscriberNumber, marker : marker};
@@ -148,7 +148,7 @@ function getDetails(subscriber, marker) {
                 console.log('sms sent to ' + subscriber.subscriberNumber + 'with msg: ' + sms);
             });
 
-            marker.setIcon('../img/markers/' + icons[6]);
+            marker.setIcon('/img/markers/' + icons[6]);
             $('#get-victim-modal').modal('hide');
             $('#get-victim-modal').hide();
         });

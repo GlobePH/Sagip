@@ -428,11 +428,11 @@ app.post(callbackUrl, function (request, response, next) {
 app.post(notifyUrl, function (req, res, next) {
     // Receive the sms sent by the user
     var messageJson = req.body;
-    console.log(messageJson);
-    console.log(messageJson.inboundSMSMessageList);
     var message = messageJson.inboundSMSMessageList.inboundSMSMessage[0].message;
     var subscriberNumber = messageJson.inboundSMSMessageList.inboundSMSMessage[0].senderAddress.slice(7);
-    console.log(subscriberNumber);
+
+    console.log("Message received: " + message + " from: " + subscriberNumber);
+
 
     req.models.message.create({
         content: message,
