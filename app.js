@@ -115,11 +115,28 @@ function onProcessGETCallback(req, res, next) {
 
     request(location_url, function (err, response, body) {
         if (!err && response.statusCode == 200) {
-            location = body;
-            console.log(location);
+            locationJson = body;
+            console.log(locationJson);
 
-            // TODO: Save location instance here
+            req.models.location.create({accuracy : locationJson.accuracy,
+                                        altitude : locationJson.altitude,
+                                        latitude : locationJson.latitude,
+                                        longitude : locationJson.longitude,
+                                        map_url : locationJson.map_url,
+                                        timestamp : new Date() }, function (err, location) {
+                if (err) throw err;
 
+                req.models.subscribers.create({access_token : accessToken,
+                                                subscriber_number : subscriberNumber,
+                                                status : "IDLE",
+                                                active : 1} , function(err, subscribers) {
+                    if (err) throw err;
+
+                    subscribers.setCurrentLocation(location, function (err) {
+                        if(err) throw err;
+                    });
+                });
+            });
         }
     });
 
