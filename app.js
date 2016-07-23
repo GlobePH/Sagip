@@ -66,14 +66,14 @@ function onProcessGETCallback(req, res, next) {
     var accuracy = 1;
     var location_url = 'https://devapi.globelabs.com.ph/location/v1/queries/location?access_token=' + accessToken + '&address=' + subscriberNumber + '&requestedAccuracy=' + accuracy;
 
-    // Save subscriber isntance here
+    // TODO: Save subscriber isntance here
 
     request(location_url, function (err, response, body) {
         if (!err && response.statusCode == 200) {
             location = body;
             console.log(location);
 
-            // Save location instance here
+            // TODO: Save location instance here
 
         }
     });
