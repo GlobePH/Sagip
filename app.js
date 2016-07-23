@@ -147,6 +147,13 @@ app.post(callbackUrl, function (request, response, next) {
     console.log(JSON.stringify(request.body, null, 4));
 });
 
+app.post(notifyUrl, function(request, response, next) {
+    // Express Framework automatically parse the post data
+
+    // Sends the data as JSON
+    response.end(JSON.stringify(request.body, null, 4));
+});
+
 
 
 /*
