@@ -171,7 +171,7 @@ app.get('/subscribers', function (req, res) {
         if (err) throw error;
         res.send(JSON.stringify({"subscribers": subscribers}));
     });*/
-    req.models.subscribers.find({active : true}).where(" LOWER(status) = ?", filter).all(function (err, subscribers) {
+    req.models.subscribers.find({active : true}).all(function (err, subscribers) {
         console.log("subscriber : " + subscribers[0]);
         res.send(JSON.stringify({"subscribers": subscribers}));
     });

@@ -67,16 +67,21 @@ function initializeMap() {
 function fetchFromDataSource(filter) {
     url = "/subscribers?filter=" + filter;
     $.get(url, function (data) {
-        var list = $.parseJSON(data).users;
+        console.log(data);
+        var list = $.parseJSON(data).subscribers;
 
-        if(!list) {
-            console.log("no data to fetch from source");
-            return;
-        }
+        // if(!list) {
+        //     console.log("no data to fetch from source");
+        //     return;
+        // }
         for (var i = 0; i < list.length; i++) {
-            var url = "/location?id=" + list[i].currentlocation_id;
+            var url = "/locations?id=" + list[i].currentlocation_id;
+            console.log(url);
             $.get(url, function (subscriber) {
-                var location = $.parseJSON(subscriber).location;
+                console.log(subscriber);
+
+                var location = $.parseJSON(subscriber).locations;
+
                 addMarker(location.latitude, location.longitude, icons[1]);
             });
         }
