@@ -19,7 +19,6 @@ app.use(function (req, res, next) {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-
 /*
  * DB Settings
  * */
@@ -28,11 +27,40 @@ app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
         models.subscribers = db.define("subscribers", {
             access_token: String,
             subscriber_number: String,
-            base_location: String,
-            cuurent_location: String,
             status: String,
             active: Boolean
         });
+
+        models.location = db.define("location", {
+            accuracy: String,
+            altitude: String,
+            latitude: String,
+            longitude: String,
+            map_url: String,
+            timestamp: Date
+        });
+
+        models.organization = db.define("organization", {
+            name: String
+        });
+
+        models.user = db.define("user", {
+            user_name: String,
+            password: String,
+            access_token: String,
+            subscriber_number: String,
+            admin: Boolean
+        });
+
+        models.message = db.define("message", {
+            content: String
+        });
+
+        models.subscribers.hasOne('currentLocation', models.location);
+        models.subscribers.hasOne('baseLocation', models.location);
+
+        models.user.hasOne("organization", models.organization);
+
         db.sync(function (err) {
             if (err) throw err;
         });
