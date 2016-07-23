@@ -39,6 +39,7 @@ app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
         });
 
         models.location = db.define("location", {
+            address : String,
             accuracy: String,
             altitude: String,
             latitude: String,
@@ -187,7 +188,7 @@ function onProcessGETCallback(req, res, next) {
     var subscriberNumber = req.query['subscriber_number'];
     var accuracy = 1;
     var location_url = 'https://devapi.globelabs.com.ph/location/v1/queries/location?access_token=' + accessToken + '&address=' + subscriberNumber + '&requestedAccuracy=' + accuracy;
-
+    var address;
     // TODO: CHECK IF SUBSCRIBER NUMBER ALREADY EXISTS, IF YES, SIMPLY UPDATE ACCESS TOKEN,
     // AND SET IS_ACTIVE TO TRUE.
     // TODO: Subscriber should be unique
@@ -197,8 +198,21 @@ function onProcessGETCallback(req, res, next) {
             locationJson = JSON.parse(body);
             console.log(locationJson.terminalLocationList);
 
+            // TODO : For Testing
             currentLocation = locationJson.terminalLocationList.terminalLocation.currentLocation;
+            address_url = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + currentLocation.latitude + "," + currentLocation.longitude;
+
+            request(address_url, function(err,response, body) {
+                if (!err && response.statusCode == 200) {
+                    console.log(body);
+                    addressJson = JSON.parse(body);
+                    address = addressJson.results.address_components[0].formatted_address;
+
+                }
+            });
+
             req.models.location.create({
+                address : address,
                 accuracy: currentLocation.accuracy,
                 altitude: currentLocation.altitude,
                 latitude: currentLocation.latitude,
