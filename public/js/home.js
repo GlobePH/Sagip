@@ -17,7 +17,7 @@ $(document).ready(function () {
 
     $("#floating-filter").on("click", function () {
         setMapOnMarkers(null, markers);
-        var filter = $('input:checkbox:checked').attr('id');
+        var filter = $('input:checked').val();
         console.log(filter);
         fetchFromDataSource(filter);
     });

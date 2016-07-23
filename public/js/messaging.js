@@ -73,8 +73,14 @@ function selectContact(element) {
         }
     });
 
+    $.get('/admin-messages?subscriber_id=' + subscribers[index].id, function (data) {
+        var messages = $.parseJSON(data).messages;
+        for (var i = 0; i < messages.length; i++) {
+            addMessage(true, messages[i].content, new Date(messages[i].timestamp).toDateString());
+        }
+    });
+
     var loc_url = '/locations?id=' + subscribers[index].currentlocation_id;
-//    var loc_url = '/location?id=' + subscribers[index].baselocation_id;
 
     $.get(loc_url, function (data) {
 //        console.log(data);

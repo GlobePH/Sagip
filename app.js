@@ -7,7 +7,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var request = require('request');
 var orm = require('orm');
 var request = require('request');
 
@@ -16,12 +15,6 @@ var request = require('request');
  * */
 var philippines = require('philippines');
 var cities = require('philippines/cities');
-
-var appShortCode = '21586966'; // full short code
-var appId = 'djd9H6bA76CG5Tj7zriAXnCGzj4LH68z'; // application id
-var appSecret = '874841e787fe889888dbd6d36cf1e99e41c2ffb833fea71f71171f0d45f7ed44'; // application secret
-var callbackUrl = '/callback';
-var notifyUrl = '/sms';
 
 /*
  * Node settings
@@ -44,6 +37,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 /*
  * DB Settings: Add/Update schema in file
  * */
+//
 app.use(orm.express('postgres://kxedkdjhlvemzg:AzFP0H0DB-uoCuJaxR4lme8BFq@ec2-54-243-200-63.compute-1.amazonaws.com:5432/d2sk2nbcgq8sju?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory', {
     define: function (db, models, next) {
         models.subscribers = db.define("subscribers", {
@@ -80,10 +74,16 @@ app.use(orm.express('postgres://kxedkdjhlvemzg:AzFP0H0DB-uoCuJaxR4lme8BFq@ec2-54
             timestamp: Date
         });
 
+        models.message_admin = db.define("message_admin", {
+            content: String,
+            timestamp: Date
+        });
+
         models.subscribers.hasOne('currentLocation', models.location);
         models.subscribers.hasOne('baseLocation', models.location);
 
         models.message.hasOne('sender', models.subscriber, {reverse: "messages"});
+        models.message_admin.hasOne('receiver', models.subscriber, {reverse: "message_admin"});
 
         models.user.hasOne("organization", models.organization);
 
@@ -166,20 +166,39 @@ app.get('/locations-all', function (req, res) {
 });
 
 app.get('/subscribers', function (req, res) {
-    var filter = req.query["filter"];
+    var filter = [req.query["filter"]];
     /*req.models.subscribers.find({active: true}).all(function (err, subscribers) {
-        if (err) throw error;
-        res.send(JSON.stringify({"subscribers": subscribers}));
-    });*/
-    req.models.subscribers.find({active : true}).all(function (err, subscribers) {
-        console.log("subscriber : " + subscribers[0]);
-        res.send(JSON.stringify({"subscribers": subscribers}));
-    });
+     if (err) throw error;
+     res.send(JSON.stringify({"subscribers": subscribers}));
+     });*/
+
+    if (req.query["filter"]) {
+        req.models.subscribers.find({active: true}).where(" LOWER(status) = ?", filter).all(function (err, subscribers) {
+            console.log("subscriber : " + subscribers[0]);
+            res.send(JSON.stringify({"subscribers": subscribers}));
+        });
+    } else {
+        req.models.subscribers.find({active: true}).all(function (err, subscribers) {
+            console.log("subscriber : " + subscribers[0]);
+            res.send(JSON.stringify({"subscribers": subscribers}));
+        });
+
+    }
+
+
 });
 
 app.get('/subscriber-messages', function (req, res) {
     var senderId = req.query['subscriber_id'];
     req.models.message.find({sender_id: senderId}).all(function (err, messages) {
+        if (err) throw error;
+        res.send(JSON.stringify({"messages": messages}));
+    });
+});
+
+app.get('/admin-messages', function (req, res) {
+    var receiverId = req.query['subscriber_id'];
+    req.models.message_admin.find({receiver_id: receiverId}).all(function (err, messages) {
         if (err) throw error;
         res.send(JSON.stringify({"messages": messages}));
     });
@@ -237,6 +256,7 @@ app.get('/broadcast-message', function (req, res) {
 app.get('/send-message', function (req, res) {
     var number = req.query['subscriber_number'];
     var message = req.query['message'];
+
     send(req, number, message);
 });
 
@@ -256,6 +276,21 @@ function send(req, number, message) {
     /*
      * Send sms to a single number
      * */
+
+    // Save to db first
+    req.models.message_admin.create({
+        content: message,
+        timestamp: new Date()
+    }, function (err, msg) {
+        if (err) throw err;
+        req.models.subscribers.find({subscriber_number: number}, function (err, subscriber) {
+            if (err) throw err;
+            msg.setReceiver(subscriber[0], function (err) {
+                if (err) throw err;
+            });
+        });
+    });
+
     req.models.subscribers.find({subscriber_number: number}, function (err, data) {
         data = data[0];
         var subscriber = data.subscriber_number;
