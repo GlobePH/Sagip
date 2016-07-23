@@ -168,13 +168,24 @@ app.get('/locations-all', function (req, res) {
 app.get('/subscribers', function (req, res) {
     var filter = [req.query["filter"]];
     /*req.models.subscribers.find({active: true}).all(function (err, subscribers) {
-        if (err) throw error;
-        res.send(JSON.stringify({"subscribers": subscribers}));
-    });*/
-    req.models.subscribers.find({active : true}).where(" LOWER(status) = ?", filter).all(function (err, subscribers) {
-        console.log("subscriber : " + subscribers[0]);
-        res.send(JSON.stringify({"subscribers": subscribers}));
-    });
+     if (err) throw error;
+     res.send(JSON.stringify({"subscribers": subscribers}));
+     });*/
+
+    if (req.query["filter"]) {
+        req.models.subscribers.find({active: true}).where(" LOWER(status) = ?", filter).all(function (err, subscribers) {
+            console.log("subscriber : " + subscribers[0]);
+            res.send(JSON.stringify({"subscribers": subscribers}));
+        });
+    } else {
+        req.models.subscribers.find({active: true}).all(function (err, subscribers) {
+            console.log("subscriber : " + subscribers[0]);
+            res.send(JSON.stringify({"subscribers": subscribers}));
+        });
+
+    }
+
+
 });
 
 app.get('/subscriber-messages', function (req, res) {
