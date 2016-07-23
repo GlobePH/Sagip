@@ -2,7 +2,7 @@ $(document).ready(function(){
     getSubscriber();
 
     $('#send-msg').on('click', function(){
-        addMessage(true, $('#compose-text').val());
+        addMessage(true, $('#compose-text').val(), new Date().toDateString());
     });
 
 });
@@ -24,11 +24,12 @@ function getSubscriber() {
     });
 }
 
-function addMessage(status, content) {
+function addMessage(status, content, timestamp) {
     var tag = "<div class='col-md-12 message-wrapper'>";
-        if (status) tag += "<div class='message message-admin'>"
-        else tag += "<div class='message message-client'>";
-    tag += content + "</div></div>"
+    if (status) tag += "<div class='message message-admin'>"
+    else tag += "<div class='message message-client'>";
+    tag += content + "<p class='message-time'>" +
+        timestamp + "</p></div></div>"
     $('#thread-body').append(tag);
 }
 
@@ -39,15 +40,22 @@ function selectContact(element) {
     $('#thread-title h4').html(contacts[index].subscriber_number);
 
     var url = '/subscriber-messages?subscriber_id=' + contacts[index].id;
+    console.log(url);
     $.get(url, function (data){
-        console.log(data);
+        var messages = $.parseJSON(data).messages;
+
+        for(var i=0; i<messages.length; i++) {
+            console.log(messages[i]);
+            addMessage(false, messages[i].content, new Date(messages[i].timestamp).toDateString());
+        }
+
     });
 }
 
 function deselectContacts(element) {
-   $('#contact-list li').each(function(){
-       $(this).removeClass('active-contact');
-   });
-
+    $('#thread-body').html('');
+    $('#contact-list li').each(function(){
+        $(this).removeClass('active-contact');
+    });
     $(element).addClass('active-contact');
 }
