@@ -21,8 +21,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 /*
-* DB Settings
-* */
+ * DB Settings
+ * */
 app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
     define: function (db, models, next) {
         models.subscribers = db.define("subscribers", {
@@ -42,11 +42,23 @@ app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
 
 
 /*
- * Routes
+ * Basic Routes
  */
 
 app.get('/', function (req, res) {
     res.send('Hello World!');
+});
+
+/*
+ * Sagip API
+ * */
+app.get('/users', function (req, res) {
+    /*
+     * @param filter: Filter users by subscribers / rescuers
+     * */
+    // TODO: Query all subscribers and rescuers here...
+    var users = [];
+    res.send(JSON.stringify({"users": users}));
 });
 
 /*
@@ -66,7 +78,8 @@ function onProcessGETCallback(req, res, next) {
     var accuracy = 1;
     var location_url = 'https://devapi.globelabs.com.ph/location/v1/queries/location?access_token=' + accessToken + '&address=' + subscriberNumber + '&requestedAccuracy=' + accuracy;
 
-    // TODO: Save subscriber isntance here
+    // TODO: Save subscriber isntance here (Jason)
+    // TODO: Refactor (Roselle)
 
     request(location_url, function (err, response, body) {
         if (!err && response.statusCode == 200) {
