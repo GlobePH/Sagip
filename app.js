@@ -10,6 +10,7 @@ var io = require('socket.io')(http);
 var request = require('request');
 var orm = require('orm');
 
+app.set('port', (process.env.PORT || 5000));
 app.set('views', path.join(__dirname, 'views'));
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
@@ -29,7 +30,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 /*
  * DB Settings
  * */
-app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
+
+app.use(orm.express("postgres://fcngqaxoxsxrkl:B3kMIWRX3670EHb88vYplWqlmw@ec2-54-243-249-56.compute-1.amazonaws.com:5432/ddbglqj7okqt1a?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory", {
     define: function (db, models, next) {
         models.subscribers = db.define("subscribers", {
             access_token: String,
@@ -39,6 +41,7 @@ app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
         });
 
         models.location = db.define("location", {
+            address: String,
             accuracy: String,
             altitude: String,
             latitude: String,
@@ -84,11 +87,11 @@ app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
  */
 
 app.get('/', function (req, res) {
-    res.render("home", {title : "Home", showBar : true});
+    res.render("home", {title: "Home", showBar: true});
 });
 
 app.get('/messaging', function (req, res) {
-    res.render("messaging", {title : "Messaging ", showBar : false});
+    res.render("messaging", {title: "Messaging ", showBar: false});
 });
 
 /*
@@ -191,7 +194,7 @@ function onProcessGETCallback(req, res, next) {
     var subscriberNumber = req.query['subscriber_number'];
     var accuracy = 1;
     var location_url = 'https://devapi.globelabs.com.ph/location/v1/queries/location?access_token=' + accessToken + '&address=' + subscriberNumber + '&requestedAccuracy=' + accuracy;
-
+    var address;
     // TODO: CHECK IF SUBSCRIBER NUMBER ALREADY EXISTS, IF YES, SIMPLY UPDATE ACCESS TOKEN,
     // AND SET IS_ACTIVE TO TRUE.
     // TODO: Subscriber should be unique
@@ -201,8 +204,21 @@ function onProcessGETCallback(req, res, next) {
             locationJson = JSON.parse(body);
             console.log(locationJson.terminalLocationList);
 
+            // TODO : For Testing
             currentLocation = locationJson.terminalLocationList.terminalLocation.currentLocation;
+            address_url = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + currentLocation.latitude + "," + currentLocation.longitude;
+
+            request(address_url, function (err, response, body) {
+                if (!err && response.statusCode == 200) {
+                    console.log(body);
+                    addressJson = JSON.parse(body);
+                    address = addressJson.results.address_components[0].formatted_address;
+
+                }
+            });
+
             req.models.location.create({
+                address: address,
                 accuracy: currentLocation.accuracy,
                 altitude: currentLocation.altitude,
                 latitude: currentLocation.latitude,
@@ -217,7 +233,7 @@ function onProcessGETCallback(req, res, next) {
                     if (exists) {
                         req.models.subscribers.find({subscriber_number: subscriberNumber}).each(function (subscriber) {
                             subscriber.acces_token = accessToken;
-                            subscriber.active = 1;
+                            subscriber.active = true;
                             subscriber.setCurrentLocation(location, function (err) {
                                 if (err) throw err;
                             });
@@ -229,7 +245,7 @@ function onProcessGETCallback(req, res, next) {
                             access_token: accessToken,
                             subscriber_number: subscriberNumber,
                             status: "IDLE",
-                            active: 1
+                            active: true,
                         }, function (err, subscriber) {
                             if (err) throw err;
                             subscriber.setCurrentLocation(location, function (err) {
@@ -253,7 +269,7 @@ app.post(callbackUrl, function (request, response, next) {
     request.models.subscribers.find({subscriber_number: subscriberNumber}).each(function (subscriber) {
         console.log("SAVINGGG");
         console.log(subscriber);
-        subscriber.active = 0;
+        subscriber.active = false;
     }).save(function (err) {
         if (err) throw err;
     });
@@ -288,6 +304,10 @@ app.post(notifyUrl, function (req, res, next) {
  * Listener
  */
 
-http.listen(3000, function () {
-    console.log('Example app listening on port 3000!');
+// http.listen(3000, function () {
+//     console.log('Example app listening on port 3000!');
+// });
+
+http.listen(app.get('port'), function () {
+    console.log('Node app is running on port', app.get('port'));
 });
