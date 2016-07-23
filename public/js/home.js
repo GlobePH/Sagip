@@ -1,5 +1,4 @@
 $(document).ready(function () {
-    initializeMenu();
     initializeMap();
 
     var socket = io();
@@ -100,34 +99,5 @@ function getDetails(dest_latitude, dest_longitude) {
         var origin = result.data.origin_addresses[0];
         console.log("\nhelp is coming from " + origin + ",\n\t" + distance +
             " away (estimate time of arrival: " + duration + ")");
-    });
-}
-
-/* UI Components */
-
-$("#menu-toggle").click(function (e) {
-    e.preventDefault();
-    $("#wrapper").toggleClass("toggled");
-});
-
-$("#menu-toggle-2").click(function (e) {
-    e.preventDefault();
-    $("#wrapper").toggleClass("toggled-2");
-    $('.menu ul').hide();
-});
-
-function initializeMenu() {
-    $('.menu ul').hide();
-    $('.menu ul').children('.current').parent().show();
-    $('.menu li a').click(function () {
-        var checkElement = $(this).next();
-        if ((checkElement.is('ul')) && (checkElement.is(':visible'))) {
-            return false;
-        }
-        if ((checkElement.is('ul')) && (!checkElement.is(':visible'))) {
-            $('.menu ul:visible').slideUp('normal');
-            checkElement.slideDown('normal');
-            return false;
-        }
     });
 }
