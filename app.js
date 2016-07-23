@@ -84,19 +84,11 @@ app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
  */
 
 app.get('/', function (req, res) {
-    res.render("home", {title : "Home", showBar: true});
+    res.render("home", {title : "Home", showBar : true});
 });
 
-app.get('/locate', function (req, res) {
-    var units = req.query['units'];
-    var origins = req.query['origins'];
-    var destinations = req.query['destinations'];
-
-    var url = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=' + origins + '&destinations=' + destinations + '&key=AIzaSyBKKTvirqm2LvwZaPD6ymCF5QS_oHueYfg';
-    request(url, function (error, response, body) {
-        res.send({"data": JSON.parse(body)});
-    });
-
+app.get('/messaging', function (req, res) {
+    res.render("messaging", {title : "Messaging ", showBar : false});
 });
 
 /*
@@ -113,6 +105,18 @@ app.get('/users', function (req, res) {
         users = user;
         res.send(JSON.stringify({"users": users}));
     });
+});
+
+app.get('/locate', function (req, res) {
+    var units = req.query['units'];
+    var origins = req.query['origins'];
+    var destinations = req.query['destinations'];
+
+    var url = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=' + origins + '&destinations=' + destinations + '&key=AIzaSyBKKTvirqm2LvwZaPD6ymCF5QS_oHueYfg';
+    request(url, function (error, response, body) {
+        res.send({"data": JSON.parse(body)});
+    });
+
 });
 
 app.get('/location', function (req, res) {

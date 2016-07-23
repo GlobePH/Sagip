@@ -3,6 +3,8 @@ $(document).ready(function() {
     initializeMap();
 });
 
+/* MAPS Components */
+
 var map;
 var origin_location;
 var markers = [];
@@ -79,6 +81,8 @@ function getDetails(dest_latitude, dest_longitude) {
             " away (estimate time of arrival: " + duration + ")");
     });
 }
+
+/* UI Components */
 
 $("#menu-toggle").click(function(e) {
     e.preventDefault();
