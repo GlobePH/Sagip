@@ -332,7 +332,7 @@ app.post(notifyUrl, function (req, res, next) {
     res.send(JSON.stringify(req.body, null, 4));
 });
 
-var sendBulk = function (req, data) {
+function sendBulk(req, data) {
     /*
      * Send SMS to an array of subscribers
      * */
@@ -344,7 +344,7 @@ var sendBulk = function (req, data) {
     }
 };
 
-var send = function (req, number, message) {
+function send(req, number, message) {
     /*
      * Send sms to a single number
      * */
