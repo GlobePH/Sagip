@@ -18,7 +18,7 @@ $(document).ready(function () {
 
     $("#floating-filter").on("click", function () {
         var checkedValues = $('input:checkbox:checked').map(function () {
-            return this.name;
+            return this.id;
         }).get();
         console.log(checkedValues);
     });
@@ -52,7 +52,7 @@ function initializeMap() {
 }
 
 function fetchFromDataSource() {
-    $.get("/subscribers", function (data) {
+    $.get("/subscribers?filter=a,b", function (data) {
         var list = $.parseJSON(data).users;
         console.log(list);
         for (var i = 0; i < list.length; i++) {
