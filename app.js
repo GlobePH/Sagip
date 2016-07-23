@@ -10,6 +10,7 @@ var io = require('socket.io')(http);
 var request = require('request');
 var orm = require('orm');
 
+app.set('port', (process.env.PORT || 5000));
 app.set('views', path.join(__dirname, 'views'));
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
@@ -29,7 +30,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 /*
  * DB Settings
  * */
-app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
+app.use(orm.express("postgres://yabqmpwuimsxyz:F44HnoHTY7NTHHzCmMCeLp-LA_@ec2-54-243-126-40.compute-1.amazonaws.com/d4slpjm81kkp7h?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory", {
     define: function (db, models, next) {
         models.subscribers = db.define("subscribers", {
             access_token: String,
@@ -85,19 +86,11 @@ app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
  */
 
 app.get('/', function (req, res) {
-    res.render("home", {title : "Home", showBar: true});
+    res.render("home", {title : "Home", showBar : true});
 });
 
-app.get('/locate', function (req, res) {
-    var units = req.query['units'];
-    var origins = req.query['origins'];
-    var destinations = req.query['destinations'];
-
-    var url = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=' + origins + '&destinations=' + destinations + '&key=AIzaSyBKKTvirqm2LvwZaPD6ymCF5QS_oHueYfg';
-    request(url, function (error, response, body) {
-        res.send({"data": JSON.parse(body)});
-    });
-
+app.get('/messaging', function (req, res) {
+    res.render("messaging", {title : "Messaging ", showBar : false});
 });
 
 /*
@@ -114,6 +107,18 @@ app.get('/users', function (req, res) {
         users = user;
         res.send(JSON.stringify({"users": users}));
     });
+});
+
+app.get('/locate', function (req, res) {
+    var units = req.query['units'];
+    var origins = req.query['origins'];
+    var destinations = req.query['destinations'];
+
+    var url = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=' + origins + '&destinations=' + destinations + '&key=AIzaSyBKKTvirqm2LvwZaPD6ymCF5QS_oHueYfg';
+    request(url, function (error, response, body) {
+        res.send({"data": JSON.parse(body)});
+    });
+
 });
 
 app.get('/location', function (req, res) {
@@ -227,7 +232,7 @@ function onProcessGETCallback(req, res, next) {
                     if (exists) {
                         req.models.subscribers.find({subscriber_number: subscriberNumber}).each(function (subscriber) {
                             subscriber.acces_token = accessToken;
-                            subscriber.active = 1;
+                            subscriber.active = true;
                             subscriber.setCurrentLocation(location, function (err) {
                                 if (err) throw err;
                             });
@@ -239,7 +244,7 @@ function onProcessGETCallback(req, res, next) {
                             access_token: accessToken,
                             subscriber_number: subscriberNumber,
                             status: "IDLE",
-                            active: 1
+                            active: true,
                         }, function (err, subscriber) {
                             if (err) throw err;
                             subscriber.setCurrentLocation(location, function (err) {
@@ -263,7 +268,7 @@ app.post(callbackUrl, function (request, response, next) {
     request.models.subscribers.find({subscriber_number: subscriberNumber}).each(function (subscriber) {
         console.log("SAVINGGG");
         console.log(subscriber);
-        subscriber.active = 0;
+        subscriber.active = false;
     }).save(function (err) {
         if (err) throw err;
     });
@@ -298,6 +303,10 @@ app.post(notifyUrl, function (req, res, next) {
  * Listener
  */
 
-http.listen(3000, function () {
-    console.log('Example app listening on port 3000!');
+// http.listen(3000, function () {
+//     console.log('Example app listening on port 3000!');
+// });
+
+http.listen(app.get('port'), function() {
+    console.log('Node app is running on port', app.get('port'));
 });

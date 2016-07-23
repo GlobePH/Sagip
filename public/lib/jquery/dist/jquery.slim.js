@@ -6093,7 +6093,7 @@ function augmentWidthOrHeight( elem, name, extra, isBorderBox, styles ) {
 		// If we already have the right measurement, avoid augmentation
 		4 :
 
-		// Otherwise initialize for horizontal or vertical properties
+		// Otherwise initializeMap for horizontal or vertical properties
 		name === "width" ? 1 : 0,
 
 		val = 0;
