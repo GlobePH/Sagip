@@ -340,7 +340,7 @@ var sendBulk = function (req, data) {
     for (var i = 0; i < data.length; i++) {
         console.log("before single send");
         console.log(data[i].subscriber_number);
-        exports.send(req, data[i].subscriber_number);
+        send(req, data[i].subscriber_number);
     }
 };
 
