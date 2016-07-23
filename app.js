@@ -129,7 +129,7 @@ app.get('/locations', function (req, res) {
             res.send(JSON.stringify({"locations": locations}));
         });
     } else {
-        req.models.location.all(function (err, locations) {
+        req.models.locations.all(function (err, locations) {
             res.send(JSON.stringify({"locations": locations}));
         });
     }
@@ -225,7 +225,7 @@ function onProcessGETCallback(req, res, next) {
                     var address = addressJson.results[0].formatted_address;
 
 
-                    req.models.location.create({
+                    req.models.locations.create({
                         address: address,
                         accuracy: currentLocation.accuracy,
                         altitude: currentLocation.altitude,
@@ -299,7 +299,7 @@ app.post(config.notifyUrl, function (req, res, next) {
     var subscriberNumber = messageJson.inboundSMSMessageList.inboundSMSMessage[0].senderAddress.slice(7);
     console.log(subscriberNumber);
 
-    req.models.message.create({
+    req.models.messages.create({
         content: message,
         timestamp: new Date()
     }, function (err, msg) {

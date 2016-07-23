@@ -89,7 +89,7 @@ function addEventListenerToMarker(marker) {
 }
 
 function getDetails(dest_latitude, dest_longitude) {
-    var url = '/locate?' + "&origins=" + origin_latitude + "," + origin_longitude +
+    var url = '/distance-matrix?' + "&origins=" + origin_latitude + "," + origin_longitude +
         "&destinations=" + dest_latitude + "," + dest_longitude;
 
     $.get(url, function (result) {
