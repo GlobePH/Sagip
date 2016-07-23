@@ -156,18 +156,26 @@ app.get('/subscribers', function (req, res) {
     });
 });
 
-// app.get('/thread', function (req, res) {
-//     var subscriberId = req.query['subscriberId'];
-//     req.models.messages.find({sender: subscriberId}).all(function (senderMessages) {
-//         console.log(senderMessages);
-//         var messageThread = senderMessages;
-//         req.models.messages.find({receiver: subscriberId}).all(function (receiverMessages) {
-//             console.log(messageThread);
-//             messageThread = messageThread.push.apply(receiverMessages);
-//             res.send(JSON.stringify({"messages": messageThread}));
-//         });
-//     });
-// });
+app.get('/subscriber-messages', function (req, res) {
+    var senderId = req.query['subscriber_id'];
+    req.models.message.find({sender_id: senderId}).all(function (err, messages) {
+        if (err) throw error;
+        res.send(JSON.stringify({"messages": messages}));
+    });
+});
+
+app.get('/thread', function (req, res) {
+    var subscriberId = req.query['subscriberId'];
+    req.models.messages.find({sender: subscriberId}).all(function (senderMessages) {
+        console.log(senderMessages);
+        var messageThread = senderMessages;
+        req.models.messages.find({receiver: subscriberId}).all(function (receiverMessages) {
+            console.log(messageThread);
+            messageThread = messageThread.push.apply(receiverMessages);
+            res.send(JSON.stringify({"messages": messageThread}));
+        });
+    });
+});
 
 
 app.get('/distance-matrix', function (req, res) {
@@ -188,7 +196,7 @@ app.get('/broadcast-message', function (req, res) {
      * @param accessToken = at of subscriber
      * */
     req.models.subscribers.all(function (err, data) {
-        utils.sendBulk(req, data);
+        sendBulk(req, data);
         res.send({});
     });
 });
@@ -196,7 +204,7 @@ app.get('/broadcast-message', function (req, res) {
 app.get('/send-message', function (req, res) {
     var number = req.query['subscriber_number'];
     var message = req.query['message'];
-    utils.send(req, number, message);
+    send(req, number, message);
 });
 
 /*
