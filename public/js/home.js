@@ -38,7 +38,6 @@ function initializeMap() {
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
-
             origin_latitude = position.coords.latitude;
             origin_longitude = position.coords.longitude;
 
@@ -55,8 +54,6 @@ function initializeMap() {
 
             addMarker(origin_latitude, origin_longitude);
             map.setCenter(origin_location);
-
-        }, function() {
             fetchFromDataSource();
         });
 
@@ -64,18 +61,17 @@ function initializeMap() {
         console.log("Not Located");
     }
 
-    function handleLocationError(browserHasGeolocation, infoWindow, pos) {
-        infoWindow.setPosition(pos);
-        infoWindow.setContent(browserHasGeolocation ?
-            'Error: The Geolocation service failed.' :
-            'Error: Your browser doesn\'t support geolocation.');
-    }
 }
 
 function fetchFromDataSource() {
     $.get("/subscribers?filter=a,b", function (data) {
         var list = $.parseJSON(data).users;
-        if(!list) return;
+
+        if(!list) {
+            console.log("no data to fetch from source");
+            return;
+        }
+
         for (var i = 0; i < list.length; i++) {
             var url = "/location?id=" + list[i].currentlocation_id;
             $.get(url, function (subscriber) {
