@@ -21,91 +21,98 @@
 <script src="/js/styles.js"></script>
 
 <div id="wrapper">
-        <div id="sidebar-wrapper">
-            <ul class="sidebar-nav top-nav nav-stacked menu">
-                <li>
-                    <div class="brand">
-                        <a href="#"><span class="pull-left"><img src="/img/testlogo.png" width=25px/></span> <font style="font-size: 30px; font-family: 'Pacifico', sans-serif">Sagip</font></a>
-                    </div>
-                </li>
-                <li class="active">
-                    <a href="#"><span class="fa-stack fa-lg pull-left"><i class="fa fa-map fa-stack-1x "></i></span> Dashboard</a>
-                </li>
-                <li>
-                    <a href="#"><span class="fa-stack fa-lg pull-left"><i class="fa fa-envelope fa-stack-1x "></i></span> Messaging</a>
-                </li>
-                <li>
-                    <a href="#"><span class="fa-stack fa-lg pull-left"><i class="fa fa-users fa-stack-1x "></i></span>Partner Organizations</a>
-                </li>
-                <li>
-                    <a href="#"> <span class="fa-stack fa-lg pull-left"><i class="fa fa-history fa-stack-1x "></i></span>Log</a>
-                </li>
-            </ul>
-            <ul class="sidebar-nav bottom-nav nav-stacked menu">
-                <li>
-                    <a href="#"><span class="fa-stack fa-lg pull-left"><i class="fa fa-user fa-stack-1x "></i></span> Account</a>
-                </li>
-                <li>
-                    <a href="#"><span class="fa-stack fa-lg pull-left"><i class="fa fa-sign-out fa-stack-1x "></i></span> Logout</a>
-                </li>
-            </ul>
-        </div>
-        <div id="page-content-wrapper">
-            <nav class="navbar navbar-default no-margin">
-                <div class="collapse navbar-collapse">
-                    <ul class="nav navbar-nav">
-                        <li class="active" >
-	                        <button class="navbar-toggle collapse in" data-toggle="collapse" id="menu-toggle-2">
-	                            <span class="sr-only">Toggle navigation</span>
-	                            <span class="icon-bar"></span>
-	                            <span class="icon-bar"></span>
-	                            <span class="icon-bar"></span>
-	                        </button>
-                        </li>
-                    </ul>
+    <div id="sidebar-wrapper">
+        <ul class="sidebar-nav top-nav nav-stacked menu">
+            <li>
+                <div class="brand">
+                    <a href="#"><span class="pull-left"><img src="/img/testlogo.png" width=25px/></span> <font
+                            style="font-size: 30px; font-family: 'Pacifico', sans-serif">Sagip</font></a>
                 </div>
-            </nav>
-            <div class="container-fluid main-content">
-                <div class="row">
-                    {{{ body }}}
-                </div>
+            </li>
+            <li class="active">
+                <a href="#"><span class="fa-stack fa-lg pull-left"><i class="fa fa-map fa-stack-1x "></i></span>
+                    Dashboard</a>
+            </li>
+            <li>
+                <a href="#"><span class="fa-stack fa-lg pull-left"><i class="fa fa-envelope fa-stack-1x "></i></span>
+                    Messaging</a>
+            </li>
+            <li>
+                <a href="#"><span class="fa-stack fa-lg pull-left"><i class="fa fa-users fa-stack-1x "></i></span>Partner
+                    Organizations</a>
+            </li>
+            <li>
+                <a href="#"> <span class="fa-stack fa-lg pull-left"><i class="fa fa-history fa-stack-1x "></i></span>Log</a>
+            </li>
+        </ul>
+        <ul class="sidebar-nav bottom-nav nav-stacked menu">
+            <li>
+                <a href="#"><span class="fa-stack fa-lg pull-left"><i class="fa fa-user fa-stack-1x "></i></span>
+                    Account</a>
+            </li>
+            <li>
+                <a href="#"><span class="fa-stack fa-lg pull-left"><i class="fa fa-sign-out fa-stack-1x "></i></span>
+                    Logout</a>
+            </li>
+        </ul>
+    </div>
+    <div id="page-content-wrapper">
+        <nav class="navbar navbar-default no-margin">
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active">
+                        <button class="navbar-toggle collapse in" data-toggle="collapse" id="menu-toggle-2">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="container-fluid main-content">
+            <div class="row">
+                {{{ body }}}
             </div>
         </div>
     </div>
+</div>
 
-    {{#if showBar}}
-    	<div id="floating-filter">
-	    <h3>Filter</h3>
-	    <div class="checkbox">
-	        <input id="checkbox" type="checkbox">
-	        <label for="checkbox">Subscribers</label>
-	    </div>
-	    <div class="subscriber-filter">
-	        <div class="checkbox">
-	            <input id="checkbox" type="checkbox">
-	            <label for="checkbox">Saved</label>
-	        </div>
-	        <div class="checkbox">
-	            <input id="checkbox" type="checkbox">
-	            <label for="checkbox">In Danger</label>
-	        </div>
-	        <div class="checkbox">
-	            <input id="checkbox" type="checkbox">
-	            <label for="checkbox">Marked</label>
-	        </div>
-	        <div class="checkbox">
-	            <input id="checkbox" type="checkbox">
-	            <label for="checkbox">Idle</label>
-	        </div>
-	    </div>
-	     
-	    <div class="checkbox">
-	      <input id="checkbox" type="checkbox">
-	      <label for="checkbox">Rescuers</label>
-	    </div>
-    {{/if}}
+{{#if showBar}}
+    <div id="floating-filter">
+        <h3>Filter</h3>
+        <div class="checkbox">
+            <input id="checkbox" type="checkbox">
+            <label for="checkbox">Subscribers</label>
+        </div>
+        <div class="subscriber-filter">
+            <div class="checkbox">
+                <input id="checkbox" type="checkbox">
+                <label for="checkbox">Saved</label>
+            </div>
+            <div class="checkbox">
+                <input id="checkbox" type="checkbox">
+                <label for="checkbox">In Danger</label>
+            </div>
+            <div class="checkbox">
+                <input id="checkbox" type="checkbox">
+                <label for="checkbox">Marked</label>
+            </div>
+            <div class="checkbox">
+                <input id="checkbox" type="checkbox">
+                <label for="checkbox">Idle</label>
+            </div>
+        </div>
 
-    
+        <div class="checkbox">
+            <input id="checkbox" type="checkbox">
+            <label for="checkbox">Rescuers</label>
+        </div>
+    </div>
+{{/if}}
+
+
 </body>
 
 </html>
