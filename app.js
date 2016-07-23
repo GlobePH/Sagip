@@ -15,6 +15,8 @@ var request = require('request');
  * */
 var utils = require('./config/utils');
 var config = require('./config/config');
+var philippines = require('philippines');
+var cities = require('philippines/cities');
 
 /*
  * Node settings
@@ -81,6 +83,15 @@ app.get('/locations', function (req, res) {
     }
 });
 
+app.get('/locations-all', function (req, res) {
+    var locations = [];
+    for(var i=0; i<cities.length; i++) {
+        if(cities[i].province == "MM")
+            locations.push(cities[i]);
+    }
+    res.send(JSON.stringify({"locations": locations}));
+});
+
 app.get('/subscribers', function (req, res) {
     req.models.subscribers.find({active: true}).all(function (err, subscribers) {
         if (err) throw error;
@@ -130,7 +141,6 @@ app.get('/send-message', function (req, res) {
     var message = req.query['message'];
     utils.send(req, number, message);
 });
-
 
 /*
  * Globe API
@@ -182,6 +192,9 @@ function onProcessGETCallback(req, res, next) {
                                     console.log(accessToken);
                                     subscriber.access_token = accessToken;
                                     subscriber.active = true;
+                                    subscriber.setBaseLocation(location, function (err) {
+                                        if (err) throw err;
+                                    })
                                     subscriber.setCurrentLocation(location, function (err) {
                                         if (err) throw err;
                                     });
