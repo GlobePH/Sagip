@@ -214,10 +214,12 @@ app.post(callbackUrl, function (request, response, next) {
 
 app.post(notifyUrl, function (req, res, next) {
     // Receive the sms sent by the user
-    console.log(JSON.stringify(req.body, null, 4));
-    var messageJson = JSON.parse(req.body);
-    var message = messageJson.outboundSMSMessageRequest.outboundSMSTextMessage.message;
-    var subscriberNumber = messageJson.outboundSMSMessageRequest.address.slice(7);
+    var messageJson = req.body;
+    console.log(messageJson);
+    console.log(messageJson.inboundSMSMessageList);
+    var message = messageJson.inboundSMSMessageList.inboundSMSMessage[0].message;
+    var subscriberNumber = messageJson.inboundSMSMessageList.inboundSMSMessage[0].senderAddress.slice(7);
+    console.log(subscriberNumber);
     req.models.message.create({
         content: message,
         timestamp: new Date()
@@ -225,7 +227,7 @@ app.post(notifyUrl, function (req, res, next) {
         if (err) throw err;
         req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
             if (err) throw err;
-            msg.setSender(subscriber, function (err) {
+            msg.setSender(subscriber[0], function (err) {
                 if (err) throw err;
             });
         });
