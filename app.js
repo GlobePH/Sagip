@@ -7,6 +7,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var request = require('request');
 var orm = require('orm');
 var request = require('request');
 
@@ -52,7 +53,7 @@ app.use(orm.express('postgres://kxedkdjhlvemzg:AzFP0H0DB-uoCuJaxR4lme8BFq@ec2-54
             active: Boolean
         });
 
-        models.locations = db.define("location", {
+        models.location = db.define("location", {
             address: String,
             accuracy: String,
             altitude: String,
@@ -62,11 +63,11 @@ app.use(orm.express('postgres://kxedkdjhlvemzg:AzFP0H0DB-uoCuJaxR4lme8BFq@ec2-54
             timestamp: Date
         });
 
-        models.organizations = db.define("organization", {
+        models.organization = db.define("organization", {
             name: String
         });
 
-        models.users = db.define("user", {
+        models.user = db.define("user", {
             user_name: String,
             password: String,
             access_token: String,
@@ -74,18 +75,17 @@ app.use(orm.express('postgres://kxedkdjhlvemzg:AzFP0H0DB-uoCuJaxR4lme8BFq@ec2-54
             admin: Boolean
         });
 
-        models.messages = db.define("message", {
-            sender: String,
-            receiver: String,
+        models.message = db.define("message", {
             content: String,
             timestamp: Date
         });
 
-        models.subscribers.hasOne('currentLocation', models.locations);
-        models.subscribers.hasOne('baseLocation', models.locations);
-        models.messages.hasOne('sender', models.subscribers, {reverse: "messages"});
-        models.messages.hasOne('receiver', models.users, {reverse: "messages"});
-        models.users.hasOne("organization", models.organizations);
+        models.subscribers.hasOne('currentLocation', models.location);
+        models.subscribers.hasOne('baseLocation', models.location);
+
+        models.message.hasOne('sender', models.subscriber, {reverse: "messages"});
+
+        models.user.hasOne("organization", models.organization);
 
         db.sync(function (err) {
             if (err) throw err;
@@ -127,6 +127,18 @@ app.get('/users', function (req, res) {
     });
 });
 
+app.get('/locate', function (req, res) {
+    var units = req.query['units'];
+    var origins = req.query['origins'];
+    var destinations = req.query['destinations'];
+
+    var url = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=' + origins + '&destinations=' + destinations + '&key=AIzaSyBKKTvirqm2LvwZaPD6ymCF5QS_oHueYfg';
+    request(url, function (error, response, body) {
+        res.send({"data": JSON.parse(body)});
+    });
+
+});
+
 app.get('/locations', function (req, res) {
     /*
      * Query all location
@@ -165,6 +177,18 @@ app.get('/subscriber-messages', function (req, res) {
     req.models.message.find({sender_id: senderId}).all(function (err, messages) {
         if (err) throw error;
         res.send(JSON.stringify({"messages": messages}));
+    });
+});
+
+app.get('/broadcast', function (req, res) {
+    /*Send the sms message to notify url via GET to text subscriber
+     * @param subscriber = where to send the msg
+     * @param accessToken = at of subscriber
+     * */
+    req.models.subscribers.all(function (err, data) {
+        console.log(data);
+        sendBulk(req, data);
+        res.send({});
     });
 });
 
@@ -211,9 +235,63 @@ app.get('/send-message', function (req, res) {
     send(req, number, message);
 });
 
+function sendBulk(req, data) {
+    /*
+     * Send SMS to an array of subscribers
+     * */
+    console.log("sending");
+    for (var i = 0; i < data.length; i++) {
+        console.log("before single send");
+        console.log(data[i].subscriber_number);
+        send(req, data[i].subscriber_number);
+    }
+}
+
+function send(req, number, message) {
+    /*
+     * Send sms to a single number
+     * */
+    req.models.subscribers.find({subscriber_number: number}, function (err, data) {
+        data = data[0];
+        var subscriber = data.subscriber_number;
+        var accessToken = data.access_token;
+        var send_url = 'https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/' + appShortCode + '/requests?access_token=' + accessToken;
+        var message = message;
+        var form = {
+            "outboundSMSMessageRequest": {
+                "clientCorrelator": "123456",
+                "senderAddress": "tel:" + 6966,
+                "outboundSMSTextMessage": {"message": message},
+                "address": ["tel:+" + subscriber]
+            }
+        };
+
+        var options = {
+            url: send_url,
+            form: form
+        };
+
+        request.post(options, function (error, response, body) {
+            console.log(body);
+            if (!error && response.statusCode == 200) {
+                console.log(body); // Show the HTML for the Google homepage.
+                res.send({"status": "ok", "message": body});
+            }
+        })
+
+    });
+}
+
+
 /*
  * Globe API
  * */
+
+var appShortCode = '21586966'; // full short code
+var appId = 'djd9H6bA76CG5Tj7zriAXnCGzj4LH68z'; // application id
+var appSecret = '874841e787fe889888dbd6d36cf1e99e41c2ffb833fea71f71171f0d45f7ed44'; // application secret
+var callbackUrl = '/callback';
+var notifyUrl = '/sms';
 
 app.get(callbackUrl, onProcessGETCallback);
 function onProcessGETCallback(req, res, next) {
@@ -315,8 +393,7 @@ app.post(notifyUrl, function (req, res, next) {
     var message = messageJson.inboundSMSMessageList.inboundSMSMessage[0].message;
     var subscriberNumber = messageJson.inboundSMSMessageList.inboundSMSMessage[0].senderAddress.slice(7);
     console.log(subscriberNumber);
-
-    req.models.messages.create({
+    req.models.message.create({
         content: message,
         timestamp: new Date()
     }, function (err, msg) {
@@ -332,52 +409,6 @@ app.post(notifyUrl, function (req, res, next) {
     res.send(JSON.stringify(req.body, null, 4));
 });
 
-function sendBulk(req, data) {
-    /*
-     * Send SMS to an array of subscribers
-     * */
-    console.log("sending");
-    for (var i = 0; i < data.length; i++) {
-        console.log("before single send");
-        console.log(data[i].subscriber_number);
-        send(req, data[i].subscriber_number);
-    }
-};
-
-function send(req, number, message) {
-    /*
-     * Send sms to a single number
-     * */
-    req.models.subscribers.find({subscriber_number: number}, function (err, data) {
-        data = data[0];
-        var subscriber = data.subscriber_number;
-        var accessToken = data.access_token;
-        var send_url = 'https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/' + appShortCode + '/requests?access_token=' + accessToken;
-        var message = message;
-        var form = {
-            "outboundSMSMessageRequest": {
-                "clientCorrelator": "123456",
-                "senderAddress": "tel:" + 6966,
-                "outboundSMSTextMessage": {"message": message},
-                "address": ["tel:+" + subscriber]
-            }
-        };
-
-        var options = {
-            url: send_url,
-            form: form
-        };
-
-        request.post(options, function (error, response, body) {
-            console.log(body);
-            if (!error && response.statusCode == 200) {
-                console.log(body); // Show the HTML for the Google homepage.
-                res.send({"status": "ok", "message": body});
-            }
-        })
-
-    });
-};
 
 /*
  * Socket.io
@@ -395,6 +426,3 @@ io.on('connection', function (socket) {
 http.listen(app.get('port'), function () {
     console.log('Node app is running on port', app.get('port'));
 });
-
-
-module.exports = app;
