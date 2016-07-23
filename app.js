@@ -450,6 +450,11 @@ app.post(notifyUrl, function (req, res, next) {
                 subscriber.status = "IDLE";
                 msg.setSender(subscriber[0], function (err) { if (err) throw err; });
             }).save(function (err) { if(err) throw err; });
+        } else {
+            req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
+                if (err) throw err;
+                msg.setSender(subscriber[0], function (err) { if (err) throw err; });
+            });
         }
     });
 
