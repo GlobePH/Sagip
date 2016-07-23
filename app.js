@@ -272,6 +272,9 @@ function onProcessGETCallback(req, res, next) {
                                     console.log(accessToken);
                                     subscriber.access_token = accessToken;
                                     subscriber.active = true;
+                                    subscriber.setBaseLocation(location, function (err) {
+                                        if (err) throw err;
+                                    })
                                     subscriber.setCurrentLocation(location, function (err) {
                                         if (err) throw err;
                                     });

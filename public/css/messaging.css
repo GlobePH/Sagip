@@ -1,9 +1,9 @@
 div {
-    border: solid 1px red;
-}
+/*    border: solid 1px red;
+*/s}
 
 #messaging-panel {
-    background: yellow;
+    padding: 0;
     height: calc(100vh - 52px);
 }
 
@@ -27,21 +27,25 @@ div {
 }
 
 #thread-title {
+    height: 70px;
     margin: 0;
 }
 
 #thread-body {
     padding: 20px;
-    height: calc(100vh - 202px);
+    height: calc(100vh - 252px);
     overflow-y: scroll;
 }
 
 #thread-compose-message {
-    height: 150px;
+    padding: 10px 20px;
+    height: 130px;
+    border-top: solid 1px #ecf0f1;
 }
 
 #compose-text {
     width: 100%;
+    resize: none;
 }
 
 #send-msg {
