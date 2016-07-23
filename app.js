@@ -207,11 +207,14 @@ function onProcessGETCallback(req, res, next) {
             currentLocation = locationJson.terminalLocationList.terminalLocation.currentLocation;
             address_url = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + currentLocation.latitude + "," + currentLocation.longitude;
 
+            io.emit('add marker', currentLocation.latitude, currentLocation.longitude);
+
             request(address_url, function (err, response, body) {
                 if (!err && response.statusCode == 200) {
                     console.log(body);
                     addressJson = JSON.parse(body);
                     var address = addressJson.results[0].formatted_address;
+
 
                     req.models.location.create({
                         address: address,
@@ -303,8 +306,8 @@ app.post(notifyUrl, function (req, res, next) {
  * Socket.io
  */
 
-io.on('connection', function(socket){
-    socket.on('chat message', function(msg){
+io.on('connection', function (socket) {
+    socket.on('chat message', function (msg) {
         io.emit('chat message', msg);
     });
 });
@@ -312,11 +315,11 @@ io.on('connection', function(socket){
 /*
  * Socket.io
  */
-io.on('connection', function(socket){
-    socket.on('chat message', function(msg){
-        io.emit('chat message', msg);
-    });
-});
+// io.on('connection', function(socket){
+//     socket.on('chat message', function(msg){
+//
+//     });
+// });
 
 /*
  * Listener

@@ -1,4 +1,10 @@
 $(document).ready(function () {
+    var socket = io();
+
+    socket.on('add marker', function (lat, lng) {
+        addMarker(lat, lng);
+    });
+
     initializeMenu();
     initializeMap();
 });
