@@ -88,17 +88,18 @@ app.get('/subscribers', function (req, res) {
     });
 });
 
-app.get('/thread', function (req, res) {
-    var subscriberId = req.query['subscriberId'];
-    req.models.messages.find({sender: subscriberId}).all(function (senderMessages) {
-        var messageThread = senderMessages;
-        req.models.messages.find({receiver: subscriberId}).all(function (receiverMessages) {
-            console.log(messageThread);
-            messageThread = messageThread.concat(receiverMessages);
-            res.send(JSON.stringify({"messages": messageThread}));
-        });
-    });
-});
+// app.get('/thread', function (req, res) {
+//     var subscriberId = req.query['subscriberId'];
+//     req.models.messages.find({sender: subscriberId}).all(function (senderMessages) {
+//         console.log(senderMessages);
+//         var messageThread = senderMessages;
+//         req.models.messages.find({receiver: subscriberId}).all(function (receiverMessages) {
+//             console.log(messageThread);
+//             messageThread = messageThread.push.apply(receiverMessages);
+//             res.send(JSON.stringify({"messages": messageThread}));
+//         });
+//     });
+// });
 
 
 app.get('/distance-matrix', function (req, res) {
