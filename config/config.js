@@ -10,8 +10,4 @@ exports.notifyUrl = '/sms';
 var params = '?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory';
 exports.database_url = 'postgres://kxedkdjhlvemzg:AzFP0H0DB-uoCuJaxR4lme8BFq@ec2-54-243-200-63.compute-1.amazonaws.com:5432/d2sk2nbcgq8sju' + params;
 
-exports.cors =
-
-exports.models =
-
 module.exports = exports;
