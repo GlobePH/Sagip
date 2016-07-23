@@ -51,7 +51,7 @@ function initializeMap() {
                 center: origin_location,
                 zoom: 13,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
-            }
+            };
 
             map = new google.maps.Map(mapContainer, mapProperties);
             console.log("new map created on: " + origin_location);
