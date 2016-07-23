@@ -403,12 +403,19 @@ app.post(notifyUrl, function (req, res, next) {
         timestamp: new Date()
     }, function (err, msg) {
         if (err) throw err;
-        req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
-            if (err) throw err;
-            msg.setSender(subscriber[0], function (err) {
+        if(message.toUpperCase() == "SAGIP CANCEL") {
+            req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
                 if (err) throw err;
-            });
-        });
+                subscriber.status = "INDANGER";
+                msg.setSender(subscriber[0], function (err) { if (err) throw err; });
+            }).save(function (err) { if(err) throw err; });
+        } else if(message.toUpperCase().startsWith("SAGIP")) {
+            req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
+                if (err) throw err;
+                subscriber.status = "IDLE";
+                msg.setSender(subscriber[0], function (err) { if (err) throw err; });
+            }).save(function (err) { if(err) throw err; });
+        }
     });
 
     res.send(JSON.stringify(req.body, null, 4));
