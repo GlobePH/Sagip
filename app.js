@@ -107,6 +107,10 @@ app.get('/messaging', function (req, res) {
     res.render("messaging", {title: "Messaging ", showBar: false});
 });
 
+app.get('/partners', function (req, res) {
+    res.render("organizations", {title: "Partner Organizaztions ", showBar: false});
+});
+
 
 /*
  * Sagip API
