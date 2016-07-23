@@ -214,7 +214,7 @@ function onProcessGETCallback(req, res, next) {
                     if (exists) {
                         req.models.subscribers.find({subscriber_number: subscriberNumber}).each(function (subscriber) {
                             subscriber.acces_token = accessToken;
-                            subscriber.active = 1;
+                            subscriber.active = true;
                             subscriber.setCurrentLocation(location, function (err) {
                                 if (err) throw err;
                             });
@@ -250,7 +250,7 @@ app.post(callbackUrl, function (request, response, next) {
     request.models.subscribers.find({subscriber_number: subscriberNumber}).each(function (subscriber) {
         console.log("SAVINGGG");
         console.log(subscriber);
-        subscriber.active = 0;
+        subscriber.active = false;
     }).save(function (err) {
         if (err) throw err;
     });
