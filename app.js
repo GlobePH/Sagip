@@ -208,11 +208,11 @@ function onProcessGETCallback(req, res, next) {
             currentLocation = locationJson.terminalLocationList.terminalLocation.currentLocation;
             address_url = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + currentLocation.latitude + "," + currentLocation.longitude;
 
-            request(address_url, function (err, response, body) {
+            request(address_url, function (err, response, body)s {
                 if (!err && response.statusCode == 200) {
                     console.log(body);
                     addressJson = JSON.parse(body);
-                    address = addressJson.results[0].address_components.formatted_address;
+                    address = addressJson.results[0].formatted_address;
 
                 }
             });
