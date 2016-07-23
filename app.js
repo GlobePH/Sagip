@@ -10,6 +10,7 @@ var io = require('socket.io')(http);
 var request = require('request');
 var orm = require('orm');
 
+app.set('port', (process.env.PORT || 5000));
 app.set('views', path.join(__dirname, 'views'));
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
@@ -284,6 +285,10 @@ app.post(notifyUrl, function (req, res, next) {
  * Listener
  */
 
-http.listen(3000, function () {
-    console.log('Example app listening on port 3000!');
+// http.listen(3000, function () {
+//     console.log('Example app listening on port 3000!');
+// });
+
+app.listen(app.get('port'), function() {
+    console.log('Node app is running on port', app.get('port'));
 });

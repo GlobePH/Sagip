@@ -1,13 +1,14 @@
 {
-  "name": "sagip",
-  "version": "1.0.0",
-  "description": "",
+  "name": "node-js-getting-started",
+  "version": "0.2.5",
+  "description": "A sample Node.js app using Express 4",
+  "engines": {
+    "node": "5.9.1"
+  },
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "body-parser": "~1.15.1",
     "cookie-parser": "~1.4.3",
@@ -24,5 +25,15 @@
   },
   "devDependencies": {
     "nodemon": "^1.9.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heroku/node-js-getting-started"
+  },
+  "keywords": [
+    "node",
+    "heroku",
+    "express"
+  ],
+  "license": "MIT"
 }
