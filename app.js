@@ -30,7 +30,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 /*
  * DB Settings
  * */
-app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
+app.use(orm.express("postgres://yabqmpwuimsxyz:F44HnoHTY7NTHHzCmMCeLp-LA_@ec2-54-243-126-40.compute-1.amazonaws.com/d4slpjm81kkp7h?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory", {
     define: function (db, models, next) {
         models.subscribers = db.define("subscribers", {
             access_token: String,
