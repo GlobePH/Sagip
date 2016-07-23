@@ -8,6 +8,10 @@ $(document).ready(function () {
         addMarker(lat, lng);
     });
 
+    socket.on('remove marker', function (lat, lng) {
+        addMarker(lat, lng);
+    });
+
     socket.on('add message', function (msg) {
         console.log(msg);
     });
