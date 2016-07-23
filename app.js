@@ -13,10 +13,14 @@ var request = require('request');
 /*
  * Important: User defined js files to divide the code
  * */
-var utils = require('./config/utils');
-var config = require('./config/config');
 var philippines = require('philippines');
 var cities = require('philippines/cities');
+
+var appShortCode = '21586966'; // full short code
+var appId = 'djd9H6bA76CG5Tj7zriAXnCGzj4LH68z'; // application id
+var appSecret = '874841e787fe889888dbd6d36cf1e99e41c2ffb833fea71f71171f0d45f7ed44'; // application secret
+var callbackUrl = '/callback';
+var notifyUrl = '/sms';
 
 /*
  * Node settings
@@ -39,7 +43,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 /*
  * DB Settings: Add/Update schema in file
  * */
-app.use(orm.express(config.database_url, {
+app.use(orm.express('postgres://kxedkdjhlvemzg:AzFP0H0DB-uoCuJaxR4lme8BFq@ec2-54-243-200-63.compute-1.amazonaws.com:5432/d2sk2nbcgq8sju?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory', {
     define: function (db, models, next) {
         models.subscribers = db.define("subscribers", {
             access_token: String,
@@ -95,6 +99,7 @@ app.use(orm.express(config.database_url, {
  * Basic Routes
  */
 app.get('/', function (req, res) {
+    console.log(appShortCode);
     res.render("home", {title: "Home", showBar: true});
 });
 
@@ -198,7 +203,7 @@ app.get('/send-message', function (req, res) {
  * Globe API
  * */
 
-app.get(config.callbackUrl, onProcessGETCallback);
+app.get(callbackUrl, onProcessGETCallback);
 function onProcessGETCallback(req, res, next) {
     var accessToken = req.query['access_token'];
     var subscriberNumber = req.query['subscriber_number'];
@@ -277,7 +282,7 @@ function onProcessGETCallback(req, res, next) {
     return res.send({"status": "OK"});
 }
 
-app.post(config.callbackUrl, function (request, response, next) {
+app.post(callbackUrl, function (request, response, next) {
     console.log(JSON.stringify(request.body, null, 4));
     subscriberNumber = request.body.unsubscribed.subscriber_number;
     console.log(subscriberNumber);
@@ -290,7 +295,7 @@ app.post(config.callbackUrl, function (request, response, next) {
     });
 });
 
-app.post(config.notifyUrl, function (req, res, next) {
+app.post(notifyUrl, function (req, res, next) {
     // Receive the sms sent by the user
     var messageJson = req.body;
     console.log(messageJson);
@@ -315,6 +320,52 @@ app.post(config.notifyUrl, function (req, res, next) {
     res.send(JSON.stringify(req.body, null, 4));
 });
 
+var sendBulk = function (req, data) {
+    /*
+     * Send SMS to an array of subscribers
+     * */
+    console.log("sending");
+    for (var i = 0; i < data.length; i++) {
+        console.log("before single send");
+        console.log(data[i].subscriber_number);
+        exports.send(req, data[i].subscriber_number);
+    }
+};
+
+var send = function (req, number, message) {
+    /*
+     * Send sms to a single number
+     * */
+    req.models.subscribers.find({subscriber_number: number}, function (err, data) {
+        data = data[0];
+        var subscriber = data.subscriber_number;
+        var accessToken = data.access_token;
+        var send_url = 'https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/' + appShortCode + '/requests?access_token=' + accessToken;
+        var message = message;
+        var form = {
+            "outboundSMSMessageRequest": {
+                "clientCorrelator": "123456",
+                "senderAddress": "tel:" + 6966,
+                "outboundSMSTextMessage": {"message": message},
+                "address": ["tel:+" + subscriber]
+            }
+        };
+
+        var options = {
+            url: send_url,
+            form: form
+        };
+
+        request.post(options, function (error, response, body) {
+            console.log(body);
+            if (!error && response.statusCode == 200) {
+                console.log(body); // Show the HTML for the Google homepage.
+                res.send({"status": "ok", "message": body});
+            }
+        })
+
+    });
+};
 
 /*
  * Socket.io
