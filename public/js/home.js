@@ -35,25 +35,43 @@ var origin_longitude = 121.049923;
 //sets up map and fetch markings from database
 function initializeMap() {
     var mapContainer = $("#map-container")[0];
-    origin_location = new google.maps.LatLng(origin_latitude, origin_longitude);
 
-    var mapProperties = {
-        center: origin_location,
-        zoom: 13,
-        mapTypeId: google.maps.MapTypeId.ROADMAP
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            origin_latitude = position.coords.latitude;
+            origin_longitude = position.coords.longitude;
+
+            origin_location = new google.maps.LatLng(origin_latitude, origin_longitude);
+
+            var mapProperties = {
+                center: origin_location,
+                zoom: 13,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            }
+
+            map = new google.maps.Map(mapContainer, mapProperties);
+            console.log("new map created on: " + origin_location);
+
+            addMarker(origin_latitude, origin_longitude);
+            map.setCenter(origin_location);
+            fetchFromDataSource();
+        });
+
+    } else {
+        console.log("Not Located");
     }
 
-    map = new google.maps.Map(mapContainer, mapProperties);
-    console.log("new map created on: " + origin_location);
-
-    addMarker(origin_latitude, origin_longitude);
-    fetchFromDataSource();
 }
 
 function fetchFromDataSource() {
     $.get("/subscribers?filter=a,b", function (data) {
         var list = $.parseJSON(data).users;
-        console.log(list);
+
+        if(!list) {
+            console.log("no data to fetch from source");
+            return;
+        }
+
         for (var i = 0; i < list.length; i++) {
             var url = "/location?id=" + list[i].currentlocation_id;
             $.get(url, function (subscriber) {
@@ -72,6 +90,7 @@ function addMarker(latitude, longitude) {
     });
     markers.push(marker);
     addEventListenerToMarker(marker);
+    map.panTo(location);
     console.log("new marker added on: " + location);
 }
 
