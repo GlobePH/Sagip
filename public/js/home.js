@@ -1,6 +1,16 @@
-$(document).ready(function() {
+$(document).ready(function () {
     initializeMenu();
     initializeMap();
+
+    var socket = io();
+
+    socket.on('add marker', function (lat, lng) {
+        addMarker(lat, lng);
+    });
+
+    socket.on('add message', function (msg) {
+        console.log(msg);
+    });
 });
 
 /* MAPS Components */
@@ -31,12 +41,12 @@ function initializeMap() {
 }
 
 function fetchFromDataSource() {
-    $.get("/subscribers", function(data){
+    $.get("/subscribers", function (data) {
         var list = $.parseJSON(data).users;
-        for(var i=0; i<list.length; i++) {
-//            console.log(list[i]);
-            var url = "/location?id=" + list[i].id;
-            $.get(url, function(subscriber){
+        console.log(list);
+        for (var i = 0; i < list.length; i++) {
+            var url = "/location?id=" + list[i].currentlocation_id;
+            $.get(url, function (subscriber) {
                 var location = $.parseJSON(subscriber).location;
                 addMarker(location.latitude, location.longitude);
             });
@@ -47,8 +57,8 @@ function fetchFromDataSource() {
 function addMarker(latitude, longitude) {
     var location = new google.maps.LatLng(latitude, longitude);
     var marker = new google.maps.Marker({
-        position : location,
-        map : map
+        position: location,
+        map: map
     });
     markers.push(marker);
     addEventListenerToMarker(marker);
@@ -56,13 +66,13 @@ function addMarker(latitude, longitude) {
 }
 
 function setMapOnMarkers(map, list) {
-    for(var i=0; i<list.length; i++) {
+    for (var i = 0; i < list.length; i++) {
         list[i].setMap(map);
     }
 }
 
 function addEventListenerToMarker(marker) {
-    marker.addListener('click', function(){
+    marker.addListener('click', function () {
         var location = marker.position.toJSON();
         getDetails(location.lat, location.lng);
     });
@@ -72,7 +82,7 @@ function getDetails(dest_latitude, dest_longitude) {
     var url = '/locate?' + "&origins=" + origin_latitude + "," + origin_longitude +
         "&destinations=" + dest_latitude + "," + dest_longitude;
 
-    $.get(url, function(result) {
+    $.get(url, function (result) {
         var details = result.data.rows[0].elements[0];
         var distance = details.distance.text;
         var duration = details.duration.text;
@@ -84,12 +94,12 @@ function getDetails(dest_latitude, dest_longitude) {
 
 /* UI Components */
 
-$("#menu-toggle").click(function(e) {
+$("#menu-toggle").click(function (e) {
     e.preventDefault();
     $("#wrapper").toggleClass("toggled");
 });
 
-$("#menu-toggle-2").click(function(e) {
+$("#menu-toggle-2").click(function (e) {
     e.preventDefault();
     $("#wrapper").toggleClass("toggled-2");
     $('.menu ul').hide();
@@ -98,12 +108,12 @@ $("#menu-toggle-2").click(function(e) {
 function initializeMenu() {
     $('.menu ul').hide();
     $('.menu ul').children('.current').parent().show();
-    $('.menu li a').click(function() {
+    $('.menu li a').click(function () {
         var checkElement = $(this).next();
-        if((checkElement.is('ul')) && (checkElement.is(':visible'))) {
+        if ((checkElement.is('ul')) && (checkElement.is(':visible'))) {
             return false;
         }
-        if((checkElement.is('ul')) && (!checkElement.is(':visible'))) {
+        if ((checkElement.is('ul')) && (!checkElement.is(':visible'))) {
             $('.menu ul:visible').slideUp('normal');
             checkElement.slideDown('normal');
             return false;
