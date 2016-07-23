@@ -25,7 +25,11 @@ app.set('port', (process.env.PORT || 5000));
 app.set('views', path.join(__dirname, 'views'));
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
-app.use(config.cors);
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -36,7 +40,55 @@ app.use(express.static(path.join(__dirname, 'public')));
  * DB Settings: Add/Update schema in file
  * */
 app.use(orm.express(config.database_url, {
-    define: config.models
+    define: function (db, models, next) {
+        models.subscribers = db.define("subscribers", {
+            access_token: String,
+            subscriber_number: String,
+            status: String,
+            active: Boolean
+        });
+
+        models.locations = db.define("location", {
+            address: String,
+            accuracy: String,
+            altitude: String,
+            latitude: String,
+            longitude: String,
+            map_url: String,
+            timestamp: Date
+        });
+
+        models.organizations = db.define("organization", {
+            name: String
+        });
+
+        models.users = db.define("user", {
+            user_name: String,
+            password: String,
+            access_token: String,
+            subscriber_number: String,
+            admin: Boolean
+        });
+
+        models.messages = db.define("message", {
+            sender: String,
+            receiver: String,
+            content: String,
+            timestamp: Date
+        });
+
+        models.subscribers.hasOne('currentLocation', models.locations);
+        models.subscribers.hasOne('baseLocation', models.locations);
+        models.messages.hasOne('sender', models.subscribers, {reverse: "messages"});
+        models.messages.hasOne('receiver', models.users, {reverse: "messages"});
+        models.users.hasOne("organization", models.organizations);
+
+        db.sync(function (err) {
+            if (err) throw err;
+        });
+
+        next();
+    }
 }));
 
 /*
@@ -85,8 +137,8 @@ app.get('/locations', function (req, res) {
 
 app.get('/locations-all', function (req, res) {
     var locations = [];
-    for(var i=0; i<cities.length; i++) {
-        if(cities[i].province == "MM")
+    for (var i = 0; i < cities.length; i++) {
+        if (cities[i].province == "MM")
             locations.push(cities[i]);
     }
     res.send(JSON.stringify({"locations": locations}));
