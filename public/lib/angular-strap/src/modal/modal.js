@@ -80,7 +80,7 @@ angular.module('mgcrea.ngStrap.modal', ['mgcrea.ngStrap.core', 'mgcrea.ngStrap.h
         // Publish isShown as a protected var on scope
         $modal.$isShown = scope.$isShown = false;
 
-        // Fetch, compile then initialize modal
+        // Fetch, compile then initializeMap modal
         var compileData;
         var modalElement;
         var modalScope;
