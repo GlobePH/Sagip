@@ -87,5 +87,10 @@ div {
 }
 
 .location-card {
+    padding: 10px;
     border: solid 1px #ecf0f1;
+}
+
+#group-msg-options {
+    padding: 10px 30px;
 }
