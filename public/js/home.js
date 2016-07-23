@@ -31,6 +31,7 @@ var markers = [];
 
 var origin_latitude = 14.553406;
 var origin_longitude = 121.049923;
+var icons = ["blue-marker.png","gray-marker.png","green-marker.png","orange-marker.png","red-marker.png","violet-marker.png","yellow-marker.png"];
 
 //sets up map and fetch markings from database
 function initializeMap() {
@@ -52,7 +53,7 @@ function initializeMap() {
             map = new google.maps.Map(mapContainer, mapProperties);
             console.log("new map created on: " + origin_location);
 
-            addMarker(origin_latitude, origin_longitude);
+            addMarker(origin_latitude, origin_longitude, icons[6]);
             map.setCenter(origin_location);
             fetchFromDataSource();
         });
@@ -76,17 +77,18 @@ function fetchFromDataSource() {
             var url = "/location?id=" + list[i].currentlocation_id;
             $.get(url, function (subscriber) {
                 var location = $.parseJSON(subscriber).location;
-                addMarker(location.latitude, location.longitude);
+                addMarker(location.latitude, location.longitude, icons[1]);
             });
         }
     });
 }
 
-function addMarker(latitude, longitude) {
+function addMarker(latitude, longitude, icon) {
     var location = new google.maps.LatLng(latitude, longitude);
     var marker = new google.maps.Marker({
         position: location,
-        map: map
+        map: map,
+        icon: '../img/markers/' + icon
     });
     markers.push(marker);
     addEventListenerToMarker(marker);
