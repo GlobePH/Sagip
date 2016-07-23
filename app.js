@@ -61,11 +61,14 @@ app.use(orm.express("mysql://sagip:sagip@localhost/sagip", {
         });
 
         models.message = db.define("message", {
-            content: String
+            content: String,
+            timestamp : Date
         });
 
         models.subscribers.hasOne('currentLocation', models.location);
         models.subscribers.hasOne('baseLocation', models.location);
+
+        models.message.hasOne('sender', models.subscriber, {reverse : "messages"});
 
         models.user.hasOne("organization", models.organization);
 
@@ -92,13 +95,22 @@ app.get('/users', function (req, res) {
     /*
      * @param filter: Filter users by subscribers / rescuers
      * */
-    // TODO: Query all subscribers and rescuers here...
-    var dummy = {
-        "latitude": "14.5609722",
-        "longitude": "121.0193394"
-    };
-    var users = [dummy];
-    res.send(JSON.stringify({"users": users}));
+
+    var users;
+    req.models.users.all(function(err, user) {
+        if(err) throw error;
+        users = user;
+        res.send(JSON.stringify({"users": users}));
+    });
+});
+
+app.get('/subscribers', function (req, res) {
+    var subscribers;
+    req.models.subscribers.all(function(err, subscriber) {
+        if(err) throw error;
+        subscribers = subscriber;
+        res.send(JSON.stringify({"users": subscribers}));
+    });
 });
 
 app.get('/send', function (req, res) {
@@ -203,8 +215,19 @@ app.post(callbackUrl, function (request, response, next) {
 app.post(notifyUrl, function (req, res, next) {
     // Receive the sms sent by the user
     console.log(JSON.stringify(req.body, null, 4));
-
-    // TODO: SAVE MESSAGE HERE
+    var messageJson =  JSON.parse(req.body);
+    var message = messageJson.outboundSMSMessageRequest.outboundSMSTextMessage.message;
+    var subscriberNumber = messageJson.outboundSMSMessageRequest.address.slice(7);
+    req.models.message.create({ content: message,
+                                timestamp : new Date() }, function(err, msg){
+        if(err) throw err;
+        req.models.subscribers.find({subscriber_number : subscriberNumber}, function(err, subscriber){
+            if(err) throw err;
+            msg.setSender(subscriber, function (err) {
+                if(err) throw err;
+            });
+        });
+    });
 
     res.send(JSON.stringify(req.body, null, 4));
 });
