@@ -16,10 +16,10 @@ $(document).ready(function () {
     });
 
     $("#floating-filter").on("click", function () {
-        var checkedValues = $('input:checkbox:checked').map(function () {
-            return this.id;
-        }).get();
-        console.log(checkedValues);
+        setMapOnMarkers(null, markers);
+        var filter = $('input:checkbox:checked').attr('id');
+        console.log(filter);
+        fetchFromDataSource(filter);
     });
 });
 
@@ -50,9 +50,10 @@ function initializeMap() {
     fetchFromDataSource();
 }
 
-function fetchFromDataSource() {
-    $.get("/subscribers?filter=a,b", function (data) {
-        var list = $.parseJSON(data).users;
+function fetchFromDataSource(filter) {
+    url = "/subscribers?filter=" + filter;
+    $.get(url, function (data) {
+        var list = $.parseJSON(data).subscribers;
         console.log(list);
         for (var i = 0; i < list.length; i++) {
             var url = "/location?id=" + list[i].currentlocation_id;
