@@ -11,6 +11,15 @@ $(document).ready(function(){
     $('new-message-modal').on('shown.bs.modal', function (){
     });
 
+    $('#select-all-group').on('click', function () {
+        $('.check-location-option').each(function () {
+            if($('#select-all-group').is(':checked'))
+                $(this).prop('checked', true);
+            else
+                $(this).prop('checked', false);
+        });
+    });
+
 });
 
 var subscribers = [];
@@ -18,7 +27,7 @@ var subscribers = [];
 function getSubscribers() {
     $.get('/subscribers', function(data) {
         subscribers = $.parseJSON(data).users;
-
+        if(!subscriber) return;
         for(var i=0; i<subscribers.length; i++) {
             var subscriber = "<li class='contact list-group-item' onclick='selectContact(this)'>" +
                 subscribers[i].subscriber_number +
@@ -33,9 +42,9 @@ function getLocations() {
         var locations = $.parseJSON(data).locations;
 
         for(var i=0; i<locations.length; i++) {
-            var location = "<div class='location col-md-3'><div class='location-card'>" +
-                "<input type='checkbox'/>&nbsp; " + locations[i].name + "</div></div>";
-            $('#location-list').append(location);
+            var location = "<div class='location col-md-4'><div class='location-card'>" +
+                "<input type='checkbox' class='check-location-option'/>&nbsp; " + locations[i].name + "</div></div>";
+            $('#location-list-content').append(location);
         }
 
     });

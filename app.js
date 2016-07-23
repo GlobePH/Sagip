@@ -13,10 +13,14 @@ var request = require('request');
 /*
  * Important: User defined js files to divide the code
  * */
-var utils = require('./config/utils');
-var config = require('./config/config');
 var philippines = require('philippines');
 var cities = require('philippines/cities');
+
+var appShortCode = '21586966'; // full short code
+var appId = 'djd9H6bA76CG5Tj7zriAXnCGzj4LH68z'; // application id
+var appSecret = '874841e787fe889888dbd6d36cf1e99e41c2ffb833fea71f71171f0d45f7ed44'; // application secret
+var callbackUrl = '/callback';
+var notifyUrl = '/sms';
 
 /*
  * Node settings
@@ -25,7 +29,11 @@ app.set('port', (process.env.PORT || 5000));
 app.set('views', path.join(__dirname, 'views'));
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
-app.use(config.cors);
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -35,19 +43,72 @@ app.use(express.static(path.join(__dirname, 'public')));
 /*
  * DB Settings: Add/Update schema in file
  * */
-app.use(orm.express(config.database_url, {
-    define: config.models
+app.use(orm.express('postgres://kxedkdjhlvemzg:AzFP0H0DB-uoCuJaxR4lme8BFq@ec2-54-243-200-63.compute-1.amazonaws.com:5432/d2sk2nbcgq8sju?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory', {
+    define: function (db, models, next) {
+        models.subscribers = db.define("subscribers", {
+            access_token: String,
+            subscriber_number: String,
+            status: String,
+            active: Boolean
+        });
+
+        models.locations = db.define("location", {
+            address: String,
+            accuracy: String,
+            altitude: String,
+            latitude: String,
+            longitude: String,
+            map_url: String,
+            timestamp: Date
+        });
+
+        models.organizations = db.define("organization", {
+            name: String
+        });
+
+        models.users = db.define("user", {
+            user_name: String,
+            password: String,
+            access_token: String,
+            subscriber_number: String,
+            admin: Boolean
+        });
+
+        models.messages = db.define("message", {
+            sender: String,
+            receiver: String,
+            content: String,
+            timestamp: Date
+        });
+
+        models.subscribers.hasOne('currentLocation', models.locations);
+        models.subscribers.hasOne('baseLocation', models.locations);
+        models.messages.hasOne('sender', models.subscribers, {reverse: "messages"});
+        models.messages.hasOne('receiver', models.users, {reverse: "messages"});
+        models.users.hasOne("organization", models.organizations);
+
+        db.sync(function (err) {
+            if (err) throw err;
+        });
+
+        next();
+    }
 }));
 
 /*
  * Basic Routes
  */
 app.get('/', function (req, res) {
+    console.log(appShortCode);
     res.render("home", {title: "Home", showBar: true});
 });
 
 app.get('/messaging', function (req, res) {
     res.render("messaging", {title: "Messaging ", showBar: false});
+});
+
+app.get('/partners', function (req, res) {
+    res.render("organizations", {title: "Partner Organizaztions ", showBar: false});
 });
 
 
@@ -77,7 +138,7 @@ app.get('/locations', function (req, res) {
             res.send(JSON.stringify({"locations": locations}));
         });
     } else {
-        req.models.location.all(function (err, locations) {
+        req.models.locations.all(function (err, locations) {
             res.send(JSON.stringify({"locations": locations}));
         });
     }
@@ -85,8 +146,8 @@ app.get('/locations', function (req, res) {
 
 app.get('/locations-all', function (req, res) {
     var locations = [];
-    for(var i=0; i<cities.length; i++) {
-        if(cities[i].province == "MM")
+    for (var i = 0; i < cities.length; i++) {
+        if (cities[i].province == "MM")
             locations.push(cities[i]);
     }
     res.send(JSON.stringify({"locations": locations}));
@@ -104,18 +165,26 @@ app.get('/subscribers', function (req, res) {
     });
 });
 
-// app.get('/thread', function (req, res) {
-//     var subscriberId = req.query['subscriberId'];
-//     req.models.messages.find({sender: subscriberId}).all(function (senderMessages) {
-//         console.log(senderMessages);
-//         var messageThread = senderMessages;
-//         req.models.messages.find({receiver: subscriberId}).all(function (receiverMessages) {
-//             console.log(messageThread);
-//             messageThread = messageThread.push.apply(receiverMessages);
-//             res.send(JSON.stringify({"messages": messageThread}));
-//         });
-//     });
-// });
+app.get('/subscriber-messages', function (req, res) {
+    var senderId = req.query['subscriber_id'];
+    req.models.message.find({sender_id: senderId}).all(function (err, messages) {
+        if (err) throw error;
+        res.send(JSON.stringify({"messages": messages}));
+    });
+});
+
+app.get('/thread', function (req, res) {
+    var subscriberId = req.query['subscriberId'];
+    req.models.messages.find({sender: subscriberId}).all(function (senderMessages) {
+        console.log(senderMessages);
+        var messageThread = senderMessages;
+        req.models.messages.find({receiver: subscriberId}).all(function (receiverMessages) {
+            console.log(messageThread);
+            messageThread = messageThread.push.apply(receiverMessages);
+            res.send(JSON.stringify({"messages": messageThread}));
+        });
+    });
+});
 
 
 app.get('/distance-matrix', function (req, res) {
@@ -136,7 +205,7 @@ app.get('/broadcast-message', function (req, res) {
      * @param accessToken = at of subscriber
      * */
     req.models.subscribers.all(function (err, data) {
-        utils.sendBulk(req, data);
+        sendBulk(req, data);
         res.send({});
     });
 });
@@ -144,14 +213,14 @@ app.get('/broadcast-message', function (req, res) {
 app.get('/send-message', function (req, res) {
     var number = req.query['subscriber_number'];
     var message = req.query['message'];
-    utils.send(req, number, message);
+    send(req, number, message);
 });
 
 /*
  * Globe API
  * */
 
-app.get(config.callbackUrl, onProcessGETCallback);
+app.get(callbackUrl, onProcessGETCallback);
 function onProcessGETCallback(req, res, next) {
     var accessToken = req.query['access_token'];
     var subscriberNumber = req.query['subscriber_number'];
@@ -178,7 +247,7 @@ function onProcessGETCallback(req, res, next) {
                     var address = addressJson.results[0].formatted_address;
 
 
-                    req.models.location.create({
+                    req.models.locations.create({
                         address: address,
                         accuracy: currentLocation.accuracy,
                         altitude: currentLocation.altitude,
@@ -230,7 +299,7 @@ function onProcessGETCallback(req, res, next) {
     return res.send({"status": "OK"});
 }
 
-app.post(config.callbackUrl, function (request, response, next) {
+app.post(callbackUrl, function (request, response, next) {
     console.log(JSON.stringify(request.body, null, 4));
     subscriberNumber = request.body.unsubscribed.subscriber_number;
     console.log(subscriberNumber);
@@ -243,7 +312,7 @@ app.post(config.callbackUrl, function (request, response, next) {
     });
 });
 
-app.post(config.notifyUrl, function (req, res, next) {
+app.post(notifyUrl, function (req, res, next) {
     // Receive the sms sent by the user
     var messageJson = req.body;
     console.log(messageJson);
@@ -252,7 +321,7 @@ app.post(config.notifyUrl, function (req, res, next) {
     var subscriberNumber = messageJson.inboundSMSMessageList.inboundSMSMessage[0].senderAddress.slice(7);
     console.log(subscriberNumber);
 
-    req.models.message.create({
+    req.models.messages.create({
         content: message,
         timestamp: new Date()
     }, function (err, msg) {
@@ -268,6 +337,52 @@ app.post(config.notifyUrl, function (req, res, next) {
     res.send(JSON.stringify(req.body, null, 4));
 });
 
+var sendBulk = function (req, data) {
+    /*
+     * Send SMS to an array of subscribers
+     * */
+    console.log("sending");
+    for (var i = 0; i < data.length; i++) {
+        console.log("before single send");
+        console.log(data[i].subscriber_number);
+        send(req, data[i].subscriber_number);
+    }
+};
+
+var send = function (req, number, message) {
+    /*
+     * Send sms to a single number
+     * */
+    req.models.subscribers.find({subscriber_number: number}, function (err, data) {
+        data = data[0];
+        var subscriber = data.subscriber_number;
+        var accessToken = data.access_token;
+        var send_url = 'https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/' + appShortCode + '/requests?access_token=' + accessToken;
+        var message = message;
+        var form = {
+            "outboundSMSMessageRequest": {
+                "clientCorrelator": "123456",
+                "senderAddress": "tel:" + 6966,
+                "outboundSMSTextMessage": {"message": message},
+                "address": ["tel:+" + subscriber]
+            }
+        };
+
+        var options = {
+            url: send_url,
+            form: form
+        };
+
+        request.post(options, function (error, response, body) {
+            console.log(body);
+            if (!error && response.statusCode == 200) {
+                console.log(body); // Show the HTML for the Google homepage.
+                res.send({"status": "ok", "message": body});
+            }
+        })
+
+    });
+};
 
 /*
  * Socket.io
