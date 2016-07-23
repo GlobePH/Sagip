@@ -30,7 +30,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 /*
  * DB Settings
  * */
-app.use(orm.express("postgres://yabqmpwuimsxyz:F44HnoHTY7NTHHzCmMCeLp-LA_@ec2-54-243-126-40.compute-1.amazonaws.com/d4slpjm81kkp7h?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory", {
+
+app.use(orm.express("postgres://fcngqaxoxsxrkl:B3kMIWRX3670EHb88vYplWqlmw@ec2-54-243-249-56.compute-1.amazonaws.com:5432/ddbglqj7okqt1a?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory", {
     define: function (db, models, next) {
         models.subscribers = db.define("subscribers", {
             access_token: String,
@@ -40,7 +41,7 @@ app.use(orm.express("postgres://yabqmpwuimsxyz:F44HnoHTY7NTHHzCmMCeLp-LA_@ec2-54
         });
 
         models.location = db.define("location", {
-            address : String,
+            address: String,
             accuracy: String,
             altitude: String,
             latitude: String,
@@ -86,11 +87,11 @@ app.use(orm.express("postgres://yabqmpwuimsxyz:F44HnoHTY7NTHHzCmMCeLp-LA_@ec2-54
  */
 
 app.get('/', function (req, res) {
-    res.render("home", {title : "Home", showBar : true});
+    res.render("home", {title: "Home", showBar: true});
 });
 
 app.get('/messaging', function (req, res) {
-    res.render("messaging", {title : "Messaging ", showBar : false});
+    res.render("messaging", {title: "Messaging ", showBar: false});
 });
 
 /*
@@ -207,7 +208,7 @@ function onProcessGETCallback(req, res, next) {
             currentLocation = locationJson.terminalLocationList.terminalLocation.currentLocation;
             address_url = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + currentLocation.latitude + "," + currentLocation.longitude;
 
-            request(address_url, function(err,response, body) {
+            request(address_url, function (err, response, body) {
                 if (!err && response.statusCode == 200) {
                     console.log(body);
                     addressJson = JSON.parse(body);
@@ -217,7 +218,7 @@ function onProcessGETCallback(req, res, next) {
             });
 
             req.models.location.create({
-                address : address,
+                address: address,
                 accuracy: currentLocation.accuracy,
                 altitude: currentLocation.altitude,
                 latitude: currentLocation.latitude,
@@ -307,6 +308,6 @@ app.post(notifyUrl, function (req, res, next) {
 //     console.log('Example app listening on port 3000!');
 // });
 
-http.listen(app.get('port'), function() {
+http.listen(app.get('port'), function () {
     console.log('Node app is running on port', app.get('port'));
 });
