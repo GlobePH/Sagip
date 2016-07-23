@@ -136,7 +136,7 @@ app.get('/location', function (req, res) {
 
 app.get('/subscribers', function (req, res) {
     var subscribers;
-    req.models.subscribers.all(function (err, subscriber) {
+    req.models.subscribers.find({active : true}).all(function (err, subscriber) {
         if (err) throw error;
         subscribers = subscriber;
         res.send(JSON.stringify({"users": subscribers}));
@@ -147,7 +147,7 @@ app.get('/subscriber-messages', function (req, res) {
     var senderId = req.query['subscriber_id'];
     req.models.message.find({sender_id : senderId}.all( function (err, messages) {
         if (err) throw error;
-        res.send(JSON.stringify({"users": messages}));
+        res.send(JSON.stringify({"messages": messages}));
     }));
 });
 
