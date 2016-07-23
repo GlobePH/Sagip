@@ -9,7 +9,7 @@
 
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/font-awesome.min.css" rel="stylesheet">
-    <link href="/css/styles.css" rel="stylesheet">
+    <link href="/css/default.css" rel="stylesheet">
     <link href="/css/build.css" rel="stylesheet">
 
 </head>
@@ -18,7 +18,6 @@
 <script src="/js/socket.io-1.2.0.js"></script>
 <script src="/js/jquery-1.12.0.min.js"></script>
 <script src="/js/bootstrap.min.js"></script>
-<script src="/js/styles.js"></script>
 
 <div id="wrapper">
     <div id="sidebar-wrapper">
@@ -57,20 +56,22 @@
         </ul>
     </div>
     <div id="page-content-wrapper">
-        <nav class="navbar navbar-default no-margin">
-            <div class="collapse navbar-collapse">
-                <ul class="nav navbar-nav">
-                    <li class="active">
-                        <button class="navbar-toggle collapse in" data-toggle="collapse" id="menu-toggle-2">
-                            <span class="sr-only">Toggle navigation</span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+        <div id="fix-to-top-wrapper">
+            <nav class="navbar navbar-default no-margin">
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+                        <li class="active">
+                            <button class="navbar-toggle collapse in" data-toggle="collapse" id="menu-toggle-2">
+                                <span class="sr-only">Toggle navigation</span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
         <div class="container-fluid main-content">
             <div class="row">
                 {{{ body }}}
@@ -88,20 +89,20 @@
         </div>
         <div class="subscriber-filter">
             <div class="checkbox">
-                <input id="checkbox" type="checkbox">
-                <label for="checkbox">Saved</label>
+                <input id="saved" type="checkbox">
+                <label for="saved">Saved</label>
             </div>
             <div class="checkbox">
-                <input id="checkbox" type="checkbox">
-                <label for="checkbox">In Danger</label>
+                <input id="inDanger" type="checkbox">
+                <label for="inDanger">In Danger</label>
             </div>
             <div class="checkbox">
-                <input id="checkbox" type="checkbox">
-                <label for="checkbox">Marked</label>
+                <input id="marked" type="checkbox">
+                <label for="marked">Marked</label>
             </div>
             <div class="checkbox">
-                <input id="checkbox" type="checkbox">
-                <label for="checkbox">Idle</label>
+                <input id="idle" type="checkbox">
+                <label for="idle">Idle</label>
             </div>
         </div>
 
@@ -112,10 +113,7 @@
     </div>
 {{/if}}
 
-
-<script>
-
-</script>
+<script src="/js/default.js"></script>
 
 </body>
 

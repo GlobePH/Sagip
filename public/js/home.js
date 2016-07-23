@@ -1,10 +1,13 @@
 $(document).ready(function () {
-    initializeMenu();
     initializeMap();
 
     var socket = io();
 
     socket.on('add marker', function (lat, lng) {
+        addMarker(lat, lng);
+    });
+
+    socket.on('remove marker', function (lat, lng) {
         addMarker(lat, lng);
     });
 
@@ -14,7 +17,7 @@ $(document).ready(function () {
 
     $("#floating-filter").on("click", function () {
         var checkedValues = $('input:checkbox:checked').map(function () {
-            return this.name;
+            return this.id;
         }).get();
         console.log(checkedValues);
     });
@@ -48,7 +51,7 @@ function initializeMap() {
 }
 
 function fetchFromDataSource() {
-    $.get("/subscribers", function (data) {
+    $.get("/subscribers?filter=a,b", function (data) {
         var list = $.parseJSON(data).users;
         console.log(list);
         for (var i = 0; i < list.length; i++) {
@@ -96,34 +99,5 @@ function getDetails(dest_latitude, dest_longitude) {
         var origin = result.data.origin_addresses[0];
         console.log("\nhelp is coming from " + origin + ",\n\t" + distance +
             " away (estimate time of arrival: " + duration + ")");
-    });
-}
-
-/* UI Components */
-
-$("#menu-toggle").click(function (e) {
-    e.preventDefault();
-    $("#wrapper").toggleClass("toggled");
-});
-
-$("#menu-toggle-2").click(function (e) {
-    e.preventDefault();
-    $("#wrapper").toggleClass("toggled-2");
-    $('.menu ul').hide();
-});
-
-function initializeMenu() {
-    $('.menu ul').hide();
-    $('.menu ul').children('.current').parent().show();
-    $('.menu li a').click(function () {
-        var checkElement = $(this).next();
-        if ((checkElement.is('ul')) && (checkElement.is(':visible'))) {
-            return false;
-        }
-        if ((checkElement.is('ul')) && (!checkElement.is(':visible'))) {
-            $('.menu ul:visible').slideUp('normal');
-            checkElement.slideDown('normal');
-            return false;
-        }
     });
 }

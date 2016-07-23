@@ -136,7 +136,7 @@ app.get('/location', function (req, res) {
 
 app.get('/subscribers', function (req, res) {
     var subscribers;
-    req.models.subscribers.find({active : true}).all(function (err, subscriber) {
+    req.models.subscribers.find({active: true}).all(function (err, subscriber) {
         if (err) throw error;
         subscribers = subscriber;
         res.send(JSON.stringify({"users": subscribers}));
@@ -145,7 +145,7 @@ app.get('/subscribers', function (req, res) {
 
 app.get('/subscriber-messages', function (req, res) {
     var senderId = req.query['subscriber_id'];
-    req.models.message.find({sender_id : senderId}).all( function (err, messages) {
+    req.models.message.find({sender_id: senderId}).all(function (err, messages) {
         if (err) throw error;
         res.send(JSON.stringify({"messages": messages}));
     });
@@ -156,14 +156,38 @@ app.get('/send', function (req, res) {
      * @param subscriber = where to send the msg
      * @param accessToken = at of subscriber
      * */
-    req.models.subscribers.find({subscriber_number: "9754880843"}, function (err, data) {
-        data = data[1];
+    req.models.subscribers.all(function (err, data) {
+        console.log(data);
+        sendBulk(req, data);
+        res.send({});
+    });
 
+
+});
+
+function sendBulk(req, data) {
+    /*
+     * Send SMS to an array of subscribers
+     * */
+    console.log("sending");
+    for (var i = 0; i < data.length; i++) {
+        console.log("before single send");
+        console.log(data[i].subscriber_number);
+        send(req, data[i].subscriber_number);
+    }
+}
+
+function send(req, number) {
+    /*
+     * Send sms to a single number
+     * */
+    req.models.subscribers.find({subscriber_number: number}, function (err, data) {
+        data = data[0];
         var subscriber = data.subscriber_number;
         var accessToken = data.access_token;
         var send_url = 'https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/' + appShortCode + '/requests?access_token=' + accessToken;
         var message = "Hello";
-        var data = {
+        var form = {
             "outboundSMSMessageRequest": {
                 "clientCorrelator": "123456",
                 "senderAddress": "tel:" + 6966,
@@ -174,7 +198,7 @@ app.get('/send', function (req, res) {
 
         var options = {
             url: send_url,
-            form: data
+            form: form
         };
 
         request.post(options, function (error, response, body) {
@@ -186,7 +210,7 @@ app.get('/send', function (req, res) {
         })
 
     });
-});
+}
 
 
 /*
@@ -205,14 +229,12 @@ function onProcessGETCallback(req, res, next) {
     var subscriberNumber = req.query['subscriber_number'];
     var accuracy = 1;
     var location_url = 'https://devapi.globelabs.com.ph/location/v1/queries/location?access_token=' + accessToken + '&address=' + subscriberNumber + '&requestedAccuracy=' + accuracy;
-    // TODO: CHECK IF SUBSCRIBER NUMBER ALREADY EXISTS, IF YES, SIMPLY UPDATE ACCESS TOKEN,
-    // AND SET IS_ACTIVE TO TRUE.
-    // TODO: Subscriber should be unique
+
     request(location_url, function (err, response, body) {
         if (!err && response.statusCode == 200) {
-            console.log(body);
+            // console.log(body);
             locationJson = JSON.parse(body);
-            console.log(locationJson.terminalLocationList);
+            // console.log(locationJson.terminalLocationList);
 
             // TODO : For Testing
             currentLocation = locationJson.terminalLocationList.terminalLocation.currentLocation;
@@ -222,7 +244,7 @@ function onProcessGETCallback(req, res, next) {
 
             request(address_url, function (err, response, body) {
                 if (!err && response.statusCode == 200) {
-                    console.log(body);
+                    // console.log(body);
                     addressJson = JSON.parse(body);
                     var address = addressJson.results[0].formatted_address;
 
@@ -242,13 +264,16 @@ function onProcessGETCallback(req, res, next) {
                             if (err) throw err;
                             if (exists) {
                                 req.models.subscribers.find({subscriber_number: subscriberNumber}).each(function (subscriber) {
-                                    subscriber.acces_token = accessToken;
+                                    console.log("When updating");
+                                    console.log(accessToken);
+                                    subscriber.access_token = accessToken;
                                     subscriber.active = true;
                                     subscriber.setCurrentLocation(location, function (err) {
                                         if (err) throw err;
                                     });
                                 }).save(function (err) {
                                     if (err) throw err;
+                                    console.log("Subscriber updated");
                                 });
                             } else {
                                 req.models.subscribers.create({
@@ -321,15 +346,6 @@ io.on('connection', function (socket) {
         io.emit('chat message', msg);
     });
 });
-
-/*
- * Socket.io
- */
-// io.on('connection', function(socket){
-//     socket.on('chat message', function(msg){
-//
-//     });
-// });
 
 /*
  * Listener
