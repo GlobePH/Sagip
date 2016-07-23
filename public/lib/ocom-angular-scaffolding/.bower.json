@@ -1,0 +1,43 @@
+{
+  "name": "ocom-angular-scaffolding",
+  "version": "2.0.2",
+  "main": "dist/ocom-angular-scaffold.min.js",
+  "devDependencies": {
+    "qunit": "*",
+    "bind-polyfill": "*"
+  },
+  "ignore": [
+    "Gruntfile.js",
+    "build.json",
+    "tasks",
+    "examples",
+    "docs",
+    "src",
+    "test",
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "angular": "^1.2.9",
+    "ui-router": "~0.2.15",
+    "angular-sweetalert": "~1.1.0",
+    "angular-growl-v2": "~0.7.5",
+    "angular-loading-bar": "~0.8.0",
+    "angular-bootstrap": "~0.13.3",
+    "angular-strap": "~2.3.1",
+    "lodash": "~3.10.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://ocom.repositoryhosting.com/git/ocom/ocom-angular-scaffolding.git"
+  },
+  "_release": "2.0.2",
+  "_resolution": {
+    "type": "version",
+    "tag": "2.0.2",
+    "commit": "f04e21b6ecf56320db9363c15a7dcd226934df8f"
+  },
+  "_source": "https://ocom.repositoryhosting.com/git/ocom/ocom-angular-scaffolding.git",
+  "_target": "2.0.2",
+  "_originalSource": "https://ocom.repositoryhosting.com/git/ocom/ocom-angular-scaffolding.git"
+}
