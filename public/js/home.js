@@ -21,6 +21,10 @@ $(document).ready(function () {
         console.log(filter);
         fetchFromDataSource(filter);
     });
+
+    $('get-victim-modal').on('shown.bs.modal', function (){
+    });
+
 });
 
 /* MAPS Components */
@@ -67,21 +71,17 @@ function initializeMap() {
 function fetchFromDataSource(filter) {
     url = "/subscribers?filter=" + filter;
     $.get(url, function (data) {
-        console.log(data);
         var list = $.parseJSON(data).subscribers;
 
-        // if(!list) {
-        //     console.log("no data to fetch from source");
-        //     return;
-        // }
+        if(!list) {
+             console.log("no data to fetch from source");
+             return;
+        }
+
         for (var i = 0; i < list.length; i++) {
             var url = "/locations?id=" + list[i].currentlocation_id;
-            console.log(url);
             $.get(url, function (subscriber) {
-                console.log(subscriber);
-
                 var location = $.parseJSON(subscriber).locations;
-
                 addMarker(location.latitude, location.longitude, icons[1]);
             });
         }
@@ -111,6 +111,7 @@ function addEventListenerToMarker(marker) {
     marker.addListener('click', function () {
         var location = marker.position.toJSON();
         getDetails(location.lat, location.lng);
+        $('#get-victim-modal').modal('open');
     });
 }
 

@@ -27,7 +27,7 @@ var subscribers = [];
 function getSubscribers() {
     $.get('/subscribers', function(data) {
         subscribers = $.parseJSON(data).users;
-        if(!subscriber) return;
+//        if(!subscriber) return;
         for(var i=0; i<subscribers.length; i++) {
             var subscriber = "<li class='contact list-group-item' onclick='selectContact(this)'>" +
                 subscribers[i].subscriber_number +
