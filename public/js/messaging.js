@@ -69,7 +69,6 @@ function selectContact(element) {
     $.get(msg_url, function (data) {
         var messages = $.parseJSON(data).messages;
         for (var i = 0; i < messages.length; i++) {
-//            console.log(data);
             addMessage(false, messages[i].content, new Date(messages[i].timestamp).toDateString());
         }
     });
@@ -78,7 +77,7 @@ function selectContact(element) {
 //    var loc_url = '/location?id=' + subscribers[index].baselocation_id;
 
     $.get(loc_url, function (data) {
-        console.log(data);
+//        console.log(data);
         var location = $.parseJSON(data).locations;
         var latitude = location.latitude;
         var longitude = location.longitude;
