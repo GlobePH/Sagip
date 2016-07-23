@@ -7,20 +7,23 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var request = require('request');
 var orm = require('orm');
+var request = require('request');
 
+/*
+ * Important: User defined js files to divide the code
+ * */
+var utils = require('./config/utils');
+var config = require('./config/config');
+
+/*
+ * Node settings
+ * */
 app.set('port', (process.env.PORT || 5000));
 app.set('views', path.join(__dirname, 'views'));
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
-
-app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
-
+app.use(config.cors);
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -28,75 +31,23 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 /*
- * DB Settings
+ * DB Settings: Add/Update schema in file
  * */
-
-app.use(orm.express("postgres://fcngqaxoxsxrkl:B3kMIWRX3670EHb88vYplWqlmw@ec2-54-243-249-56.compute-1.amazonaws.com:5432/ddbglqj7okqt1a?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory", {
-    define: function (db, models, next) {
-        models.subscribers = db.define("subscribers", {
-            access_token: String,
-            subscriber_number: String,
-            status: String,
-            active: Boolean
-        });
-
-        models.location = db.define("location", {
-            address: String,
-            accuracy: String,
-            altitude: String,
-            latitude: String,
-            longitude: String,
-            map_url: String,
-            timestamp: Date
-        });
-
-        models.organization = db.define("organization", {
-            name: String
-        });
-
-        models.user = db.define("user", {
-            user_name: String,
-            password: String,
-            access_token: String,
-            subscriber_number: String,
-            admin: Boolean
-        });
-
-        models.message = db.define("message", {
-            content: String,
-            timestamp: Date
-        });
-
-        models.subscribers.hasOne('currentLocation', models.location);
-        models.subscribers.hasOne('baseLocation', models.location);
-
-        models.message.hasOne('sender', models.subscriber, {reverse: "messages"});
-
-        models.user.hasOne("organization", models.organization);
-
-        db.sync(function (err) {
-            if (err) throw err;
-        });
-        next();
-    }
+app.use(orm.express(config.database_url, {
+    define: config.models
 }));
-
 
 /*
  * Basic Routes
  */
-
 app.get('/', function (req, res) {
     res.render("home", {title: "Home", showBar: true});
-});
-
-app.get('/test', function (req, res) {
-    io.emit('add message', "hi");
 });
 
 app.get('/messaging', function (req, res) {
     res.render("messaging", {title: "Messaging ", showBar: false});
 });
+
 
 /*
  * Sagip API
@@ -104,17 +55,53 @@ app.get('/messaging', function (req, res) {
 app.get('/users', function (req, res) {
     /*
      * @param filter: Filter users by subscribers / rescuers
+     * @param id: get specific user
      * */
-
-    var users;
-    req.models.users.all(function (err, user) {
+    var id = req.query['id'];
+    req.models.users.all(function (err, users) {
         if (err) throw error;
-        users = user;
         res.send(JSON.stringify({"users": users}));
     });
 });
 
-app.get('/locate', function (req, res) {
+app.get('/locations', function (req, res) {
+    /*
+     * Query all location
+     * @param id = the location id that we want to retrieve specifically
+     * */
+    var id = req.query['id'];
+    if (id) {
+        req.models.locations.get(id, function (err, locations) {
+            res.send(JSON.stringify({"locations": locations}));
+        });
+    } else {
+        req.models.location.all(function (err, locations) {
+            res.send(JSON.stringify({"locations": locations}));
+        });
+    }
+});
+
+app.get('/subscribers', function (req, res) {
+    req.models.subscribers.find({active: true}).all(function (err, subscribers) {
+        if (err) throw error;
+        res.send(JSON.stringify({"subscribers": subscribers}));
+    });
+});
+
+app.get('/thread', function (req, res) {
+    var subscriberId = req.query['subscriberId'];
+    req.models.messages.find({sender: subscriberId}).all(function (senderMessages) {
+        var messageThread = senderMessages;
+        req.models.messages.find({receiver: subscriberId}).all(function (receiverMessages) {
+            console.log(messageThread);
+            messageThread = messageThread.concat(receiverMessages);
+            res.send(JSON.stringify({"messages": messageThread}));
+        });
+    });
+});
+
+
+app.get('/distance-matrix', function (req, res) {
     var units = req.query['units'];
     var origins = req.query['origins'];
     var destinations = req.query['destinations'];
@@ -123,42 +110,16 @@ app.get('/locate', function (req, res) {
     request(url, function (error, response, body) {
         res.send({"data": JSON.parse(body)});
     });
-
 });
 
-app.get('/location', function (req, res) {
-    var id = req.query['id'];
-    req.models.location.get(id, function (err, location) {
-        console.log(JSON.stringify(location));
-        res.send(JSON.stringify({"location": location}));
-    });
-});
 
-app.get('/subscribers', function (req, res) {
-    var subscribers;
-    req.models.subscribers.find({active: true}).all(function (err, subscriber) {
-        if (err) throw error;
-        subscribers = subscriber;
-        res.send(JSON.stringify({"users": subscribers}));
-    });
-});
-
-app.get('/subscriber-messages', function (req, res) {
-    var senderId = req.query['subscriber_id'];
-    req.models.message.find({sender_id: senderId}).all(function (err, messages) {
-        if (err) throw error;
-        res.send(JSON.stringify({"messages": messages}));
-    });
-});
-
-app.get('/broadcast', function (req, res) {
+app.get('/broadcast-message', function (req, res) {
     /*Send the sms message to notify url via GET to text subscriber
      * @param subscriber = where to send the msg
      * @param accessToken = at of subscriber
      * */
     req.models.subscribers.all(function (err, data) {
-        console.log(data);
-        sendBulk(req, data);
+        utils.sendBulk(req, data);
         res.send({});
     });
 });
@@ -166,73 +127,21 @@ app.get('/broadcast', function (req, res) {
 app.get('/send-message', function (req, res) {
     var number = req.query['subscriber_number'];
     var message = req.query['message'];
-    send(req, number, message);
+    utils.send(req, number, message);
 });
-
-function sendBulk(req, data) {
-    /*
-     * Send SMS to an array of subscribers
-     * */
-    console.log("sending");
-    for (var i = 0; i < data.length; i++) {
-        console.log("before single send");
-        console.log(data[i].subscriber_number);
-        send(req, data[i].subscriber_number);
-    }
-}
-
-function send(req, number, message) {
-    /*
-     * Send sms to a single number
-     * */
-    req.models.subscribers.find({subscriber_number: number}, function (err, data) {
-        data = data[0];
-        var subscriber = data.subscriber_number;
-        var accessToken = data.access_token;
-        var send_url = 'https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/' + appShortCode + '/requests?access_token=' + accessToken;
-        var message = message;
-        var form = {
-            "outboundSMSMessageRequest": {
-                "clientCorrelator": "123456",
-                "senderAddress": "tel:" + 6966,
-                "outboundSMSTextMessage": {"message": message},
-                "address": ["tel:+" + subscriber]
-            }
-        };
-
-        var options = {
-            url: send_url,
-            form: form
-        };
-
-        request.post(options, function (error, response, body) {
-            console.log(body);
-            if (!error && response.statusCode == 200) {
-                console.log(body); // Show the HTML for the Google homepage.
-                res.send({"status": "ok", "message": body});
-            }
-        })
-
-    });
-}
 
 
 /*
  * Globe API
  * */
 
-var appShortCode = '21586966'; // full short code
-var appId = 'djd9H6bA76CG5Tj7zriAXnCGzj4LH68z'; // application id
-var appSecret = '874841e787fe889888dbd6d36cf1e99e41c2ffb833fea71f71171f0d45f7ed44'; // application secret
-var callbackUrl = '/callback';
-var notifyUrl = '/sms';
-
-app.get(callbackUrl, onProcessGETCallback);
+app.get(config.callbackUrl, onProcessGETCallback);
 function onProcessGETCallback(req, res, next) {
     var accessToken = req.query['access_token'];
     var subscriberNumber = req.query['subscriber_number'];
     var accuracy = 1;
     var location_url = 'https://devapi.globelabs.com.ph/location/v1/queries/location?access_token=' + accessToken + '&address=' + subscriberNumber + '&requestedAccuracy=' + accuracy;
+
 
     request(location_url, function (err, response, body) {
         if (!err && response.statusCode == 200) {
@@ -302,8 +211,7 @@ function onProcessGETCallback(req, res, next) {
     return res.send({"status": "OK"});
 }
 
-app.post(callbackUrl, function (request, response, next) {
-
+app.post(config.callbackUrl, function (request, response, next) {
     console.log(JSON.stringify(request.body, null, 4));
     subscriberNumber = request.body.unsubscribed.subscriber_number;
     console.log(subscriberNumber);
@@ -316,7 +224,7 @@ app.post(callbackUrl, function (request, response, next) {
     });
 });
 
-app.post(notifyUrl, function (req, res, next) {
+app.post(config.notifyUrl, function (req, res, next) {
     // Receive the sms sent by the user
     var messageJson = req.body;
     console.log(messageJson);
@@ -324,6 +232,7 @@ app.post(notifyUrl, function (req, res, next) {
     var message = messageJson.inboundSMSMessageList.inboundSMSMessage[0].message;
     var subscriberNumber = messageJson.inboundSMSMessageList.inboundSMSMessage[0].senderAddress.slice(7);
     console.log(subscriberNumber);
+
     req.models.message.create({
         content: message,
         timestamp: new Date()
@@ -357,3 +266,6 @@ io.on('connection', function (socket) {
 http.listen(app.get('port'), function () {
     console.log('Node app is running on port', app.get('port'));
 });
+
+
+module.exports = app;
