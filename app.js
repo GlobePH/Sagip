@@ -431,22 +431,35 @@ app.post(callbackUrl, function (request, response, next) {
 app.post(notifyUrl, function (req, res, next) {
     // Receive the sms sent by the user
     var messageJson = req.body;
-    console.log(messageJson);
-    console.log(messageJson.inboundSMSMessageList);
     var message = messageJson.inboundSMSMessageList.inboundSMSMessage[0].message;
     var subscriberNumber = messageJson.inboundSMSMessageList.inboundSMSMessage[0].senderAddress.slice(7);
-    console.log(subscriberNumber);
+
+    console.log("Message received: " + message + " from: " + subscriberNumber);
+
+
     req.models.message.create({
         content: message,
         timestamp: new Date()
     }, function (err, msg) {
         if (err) throw err;
-        req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
-            if (err) throw err;
-            msg.setSender(subscriber[0], function (err) {
+        if(message.toUpperCase() == "SAGIP CANCEL") {
+            req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
                 if (err) throw err;
+                subscriber.status = "INDANGER";
+                msg.setSender(subscriber[0], function (err) { if (err) throw err; });
+            }).save(function (err) { if(err) throw err; });
+        } else if(message.toUpperCase().startsWith("SAGIP")) {
+            req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
+                if (err) throw err;
+                subscriber.status = "IDLE";
+                msg.setSender(subscriber[0], function (err) { if (err) throw err; });
+            }).save(function (err) { if(err) throw err; });
+        } else {
+            req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
+                if (err) throw err;
+                msg.setSender(subscriber[0], function (err) { if (err) throw err; });
             });
-        });
+        }
     });
 
     res.send(JSON.stringify(req.body, null, 4));
