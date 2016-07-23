@@ -433,6 +433,7 @@ app.post(notifyUrl, function (req, res, next) {
     var message = messageJson.inboundSMSMessageList.inboundSMSMessage[0].message;
     var subscriberNumber = messageJson.inboundSMSMessageList.inboundSMSMessage[0].senderAddress.slice(7);
     console.log(subscriberNumber);
+
     req.models.message.create({
         content: message,
         timestamp: new Date()
