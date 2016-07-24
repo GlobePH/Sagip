@@ -1,0 +1,30 @@
+div {
+/*    border: solid 1px red;
+*/}
+
+#logging-panel {
+    padding: 0;
+    height: calc(100vh - 52px);
+}
+
+#log-filter-wrapper {
+    height: 100%;
+    background: #ecf0f1;
+}
+
+#log-wrapper {
+    padding: 0;
+    height: 100%;
+}
+
+#log-head {
+    margin: 0;
+    height: 70px;
+}
+
+#log-body {
+    height: calc(100vh - 122px);
+    overflow-y: scroll;
+}
+
+
