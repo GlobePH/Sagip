@@ -13,6 +13,7 @@ $(document).ready(function () {
 
     socket.on('change marker', function (subscriberNumber) {
         for (var i = 0; i < markers.length; i++) {
+            console.log(markers[i]);
             if (markers[i].subscriberNumber == subscriberNumber) {
                 console.log("Changed marker");
                 console.log(markers[i]);
@@ -89,10 +90,11 @@ function fetchFromDataSource(filter) {
             console.log("no data to fetch from source");
             return;
         }
-
+        console.log(list);
         for (var i = 0; i < list.length; i++) {
             var url = "/locations?id=" + list[i].currentlocation_id;
             $.get(url, function (subscriber) {
+                console.log(subscriber);
                 var location = $.parseJSON(subscriber).locations;
                 addMarker(location.latitude, location.longitude, icons[1], list[0].subscriber_number);
             });
