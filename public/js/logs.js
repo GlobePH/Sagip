@@ -21,7 +21,7 @@ function initialize() {
         console.log(data);
         var logs = JSON.parse(data).logs;
         for (var i = 0; i < logs.length; i++) {
-            var l = "<div class='log-entry'><h4>" + logs[i].message + "</h4><p class='log-time-stamp'>" + logs[i].timestamp + "</p></div>";
+            var l = "<div class='log-entry'><h4>" + logs[i].content + "</h4><p class='log-time-stamp'>" + logs[i].timestamp + "</p></div>";
             $('#log-body').append(l);
             console.log("new log added");
         }
