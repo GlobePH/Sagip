@@ -104,17 +104,20 @@ app.get('/', function (req, res) {
 });
 
 app.get('/messaging', function (req, res) {
-    res.render("messaging", {title: "Messaging ", showBar: false});
+    res.render("messaging", {title: "Messaging", showBar: false});
 });
 
 app.get('/partners', function (req, res) {
-    res.render("organizations", {title: "Partner Organizaztions ", showBar: false});
+    res.render("organizations", {title: "Partner Organizaztions", showBar: false});
 });
 
 app.get('/login', function (req, res) {
-    res.render("login", {title: "Log In ", showBar: false});
+    res.render("login", {layout: "login-main", title: "Log In "});
 });
 
+app.get('/logs', function (req, res) {
+    res.render("logs", {title: "Logs ", showBar: false});
+});
 
 /*
  * Sagip API
@@ -172,13 +175,24 @@ app.get('/locations-all', function (req, res) {
 app.get('/subscribers', function (req, res) {
     var filter = [req.query["filter"]];
     /*req.models.subscribers.find({active: true}).all(function (err, subscribers) {
-        if (err) throw error;
-        res.send(JSON.stringify({"subscribers": subscribers}));
-    });*/
-    req.models.subscribers.find({active : true}).where(" LOWER(status) = ?", filter).all(function (err, subscribers) {
-        console.log("subscriber : " + subscribers[0]);
-        res.send(JSON.stringify({"subscribers": subscribers}));
-    });
+     if (err) throw error;
+     res.send(JSON.stringify({"subscribers": subscribers}));
+     });*/
+
+    if (req.query["filter"]) {
+        req.models.subscribers.find({active: true}).where(" LOWER(status) = ?", filter).all(function (err, subscribers) {
+            console.log("subscriber : " + subscribers[0]);
+            res.send(JSON.stringify({"subscribers": subscribers}));
+        });
+    } else {
+        req.models.subscribers.find({active: true}).all(function (err, subscribers) {
+            console.log("subscriber : " + subscribers[0]);
+            res.send(JSON.stringify({"subscribers": subscribers}));
+        });
+
+    }
+
+
 });
 
 app.get('/subscriber-messages', function (req, res) {
@@ -344,7 +358,7 @@ function onProcessGETCallback(req, res, next) {
             currentLocation = locationJson.terminalLocationList.terminalLocation.currentLocation;
             address_url = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + currentLocation.latitude + "," + currentLocation.longitude;
 
-            io.emit('add marker', currentLocation.latitude, currentLocation.longitude);
+            io.emit('add marker', currentLocation.latitude, currentLocation.longitude, subscriberNumber);
 
             request(address_url, function (err, response, body) {
                 if (!err && response.statusCode == 200) {
@@ -421,22 +435,35 @@ app.post(callbackUrl, function (request, response, next) {
 app.post(notifyUrl, function (req, res, next) {
     // Receive the sms sent by the user
     var messageJson = req.body;
-    console.log(messageJson);
-    console.log(messageJson.inboundSMSMessageList);
     var message = messageJson.inboundSMSMessageList.inboundSMSMessage[0].message;
     var subscriberNumber = messageJson.inboundSMSMessageList.inboundSMSMessage[0].senderAddress.slice(7);
-    console.log(subscriberNumber);
+
+    console.log("Message received: " + message + " from: " + subscriberNumber);
+
+
     req.models.message.create({
         content: message,
         timestamp: new Date()
     }, function (err, msg) {
         if (err) throw err;
-        req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
-            if (err) throw err;
-            msg.setSender(subscriber[0], function (err) {
+        if(message.toUpperCase() == "SAGIP CANCEL") {
+            req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
                 if (err) throw err;
+                subscriber.status = "INDANGER";
+                msg.setSender(subscriber[0], function (err) { if (err) throw err; });
+            }).save(function (err) { if(err) throw err; });
+        } else if(message.toUpperCase().startsWith("SAGIP")) {
+            req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
+                if (err) throw err;
+                subscriber.status = "IDLE";
+                msg.setSender(subscriber[0], function (err) { if (err) throw err; });
+            }).save(function (err) { if(err) throw err; });
+        } else {
+            req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
+                if (err) throw err;
+                msg.setSender(subscriber[0], function (err) { if (err) throw err; });
             });
-        });
+        }
     });
 
     res.send(JSON.stringify(req.body, null, 4));

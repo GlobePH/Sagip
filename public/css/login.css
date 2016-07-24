@@ -1,0 +1,18 @@
+body { 
+  background: url(../images/loginbg.png) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+#login-container {
+    height: auto;
+    width: 30vw;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    left: 35%;
+    position: absolute;
+    top: 20%;
+    padding: 20px;
+}
