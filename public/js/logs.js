@@ -1,17 +1,16 @@
-$(document).ready(function (){
+$(document).ready(function () {
 
     var socket = io();
 
-    socket.on('new log', function(subscriberNumber, type, timestamp){
+    socket.on('new log', function (subscriberNumber, type, timestamp) {
         var logNotes = '';
         console.log(type);
 
-        if(type == 'send') logNotes = "New SMS sent to";
+        if (type == 'send') logNotes = "New SMS sent to";
         else logNotes = "New SMS received from";
 
         addLog(subscriberNumber, logNotes, timestamp.toString());
     });
-
 
 });
 

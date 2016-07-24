@@ -69,6 +69,12 @@ app.use(orm.express('postgres://kxedkdjhlvemzg:AzFP0H0DB-uoCuJaxR4lme8BFq@ec2-54
             admin: Boolean
         });
 
+        models.logs = db.define("log", {
+            message: String,
+            timestamp: Date
+
+        });
+
         models.message = db.define("message", {
             content: String,
             timestamp: Date
@@ -184,8 +190,10 @@ app.get('/subscribers', function (req, res) {
      if (err) throw error;
      res.send(JSON.stringify({"subscribers": subscribers}));
      });*/
-
-    if (req.query["filter"]) {
+    console.log("Fetching subscribers");
+    console.log(filter);
+    if (req.query["filter"] != undefined) {
+        console.log("Filter is null, hence");
         req.models.subscribers.find({active: true}).where(" LOWER(status) = ?", filter).all(function (err, subscribers) {
             console.log("subscriber : " + subscribers[0]);
             res.send(JSON.stringify({"subscribers": subscribers}));
@@ -439,7 +447,7 @@ app.post(callbackUrl, function (request, response, next) {
     });
 });
 
-app.get('/testing', function(req, res, next){
+app.get('/testing', function (req, res, next) {
     var subscriberNumber = '9161085543';
     io.emit('change marker', subscriberNumber);
     res.send({});
