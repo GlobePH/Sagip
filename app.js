@@ -264,6 +264,7 @@ app.get('/send-message', function (req, res) {
     var number = req.query['subscriber_number'];
     var message = req.query['message'];
 
+    io.emit('new log', number, 'send', new Date().toLocaleString());
     send(req, number, message);
 });
 
@@ -446,6 +447,7 @@ app.post(notifyUrl, function (req, res, next) {
 
     console.log("Message received: " + message + " from: " + subscriberNumber);
     io.emit('change marker', subscriberNumber);
+    io.emit('new log', subscriberNumber, 'receive', new Date().toLocaleString());
 
     /*req.models.message.create({
         content: message,
