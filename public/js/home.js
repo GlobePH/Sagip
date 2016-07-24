@@ -13,10 +13,10 @@ $(document).ready(function () {
 
     socket.on('change marker', function (subscriberNumber) {
         for (var i = 0; i < markers.length; i++) {
-            console.log(markers[i]);
+//            console.log(markers[i]);
             if (markers[i].subscriberNumber == subscriberNumber) {
                 console.log("Changed marker");
-                console.log(markers[i]);
+  //              console.log(markers[i]);
                 markers[i].marker.setIcon('/images/markers/' + icons[4]);
                 console.log("Done!");
             }
@@ -31,7 +31,7 @@ $(document).ready(function () {
     $("#floating-filter").on("click", function () {
         setMapOnMarkers(null, markers);
         var filter = $('input:checked').val();
-        console.log(filter);
+//        console.log(filter);
         fetchFromDataSource(filter);
     });
 
@@ -97,7 +97,8 @@ function fetchFromDataSource(filter) {
         }
 
         for (var i = 0; i < list.length; i++) {
-            var url = "/locations?id=" + list[i].currentlocation_id + "&subscriber_id=" + list[i].id;
+            console.log(list[i]);
+            var url = "/locations-by-id?id=" + list[i].currentlocation_id + "&subscriber_id=" + list[i].id;
             var number = list[i].subscriber_number;
 
             $.get(url, function (subscriber) {
@@ -128,7 +129,7 @@ function addMarker(latitude, longitude, icon, subscriberNumber) {
 
 function setMapOnMarkers(map, list) {
     for (var i = 0; i < list.length; i++) {
-        console.log(list[i]);
+//        console.log(list[i]);
         list[i].marker.setMap(map);
     }
 }

@@ -69,12 +69,6 @@ app.use(orm.express('postgres://kxedkdjhlvemzg:AzFP0H0DB-uoCuJaxR4lme8BFq@ec2-54
             admin: Boolean
         });
 
-        models.logs = db.define("log", {
-            message: String,
-            timestamp: Date
-
-        });
-
         models.message = db.define("message", {
             content: String,
             timestamp: Date
@@ -159,7 +153,7 @@ app.get('/locate', function (req, res) {
 
 });
 
-app.get('/locations', function (req, res) {
+app.get('/locations-by-id', function (req, res) {
     /*
      * Query all location
      * @param id = the location id that we want to retrieve specifically
@@ -174,6 +168,25 @@ app.get('/locations', function (req, res) {
                 console.log(locations);
                 res.send(JSON.stringify({"locations": locations}));
             });
+        });
+    } else {
+        req.models.location.all(function (err, locations) {
+            res.send(JSON.stringify({"locations": locations}));
+        });
+    }
+});
+
+app.get('/locations', function (req, res) {
+    /*
+     * Query all location
+     * @param id = the location id that we want to retrieve specifically
+     * */
+    var id = req.query['id'];
+    if (id) {
+        req.models.location.get(id, function (err, locations) {
+            if(err) throw err;
+            console.log(locations);
+            res.send(JSON.stringify({"locations": locations}));
         });
     } else {
         req.models.location.all(function (err, locations) {
@@ -197,10 +210,8 @@ app.get('/subscribers', function (req, res) {
      if (err) throw error;
      res.send(JSON.stringify({"subscribers": subscribers}));
      });*/
-    console.log("Fetching subscribers");
-    console.log(filter);
-    if (req.query["filter"] != undefined) {
-        console.log("Filter is null, hence");
+
+    if (req.query["filter"]) {
         req.models.subscribers.find({active: true}).where(" LOWER(status) = ?", filter).all(function (err, subscribers) {
             console.log("subscriber : " + subscribers[0]);
             res.send(JSON.stringify({"subscribers": subscribers}));
@@ -454,7 +465,7 @@ app.post(callbackUrl, function (request, response, next) {
     });
 });
 
-app.get('/testing', function (req, res, next) {
+app.get('/testing', function(req, res, next){
     var subscriberNumber = '9161085543';
     io.emit('change marker', subscriberNumber);
     res.send({});
