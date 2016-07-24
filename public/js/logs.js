@@ -6,7 +6,7 @@ $(document).ready(function(){
         addLog(subscriberNumber, status, timestamp);
     });
 
-    socket.emit('new log', );
+    // socket.emit('new log', );
 
 });
 

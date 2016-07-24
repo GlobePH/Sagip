@@ -72,7 +72,7 @@ function initializeMap() {
 
             addMarker(origin_latitude, origin_longitude, icons[5], null);
             map.setCenter(origin_location);
-            fetchFromDataSource("");
+            fetchFromDataSource(null);
         });
 
     } else {
@@ -82,7 +82,12 @@ function initializeMap() {
 }
 
 function fetchFromDataSource(filter) {
-    url = "/subscribers?filter=" + filter;
+    if (filter != null) {
+        url = "/subscribers?filter=" + filter;
+    } else {
+        url = "/subscribers";
+    }
+
     $.get(url, function (data) {
         var list = $.parseJSON(data).subscribers;
 
@@ -119,7 +124,8 @@ function addMarker(latitude, longitude, icon, subscriberNumber) {
 
 function setMapOnMarkers(map, list) {
     for (var i = 0; i < list.length; i++) {
-        list[i].setMap(map);
+        console.log(list[i]);
+        list[i].marker.setMap(map);
     }
 }
 
