@@ -1,6 +1,9 @@
 $(document).ready(function () {
     getSubscribers();
+
     getLocations();
+
+    $('#send-msg').prop('disabled',true );
 
     $('#send-msg').click(function () {
         addMessage(true, $('#compose-text').val(), new Date().toDateString());
@@ -26,8 +29,8 @@ $(document).ready(function () {
 
 });
 
-var subscribers = [];
 
+var subscribers = [];
 function getSubscribers() {
     $.get('/subscribers', function (data) {
         subscribers = $.parseJSON(data).subscribers;
@@ -63,7 +66,9 @@ function addMessage(status, content, timestamp) {
     $('#thread-body').append(tag);
 }
 
-function selectContact(element) {    
+function selectContact(element) {
+    $('#send-msg').prop('disabled', false);
+
     deselectContacts(element);
 
     var index = $(element).prevAll().length;
