@@ -152,9 +152,15 @@ app.get('/locations', function (req, res) {
      * @param id = the location id that we want to retrieve specifically
      * */
     var id = req.query['id'];
+    var subscriberId = req.query['subscriber_id'];
     if (id) {
         req.models.location.get(id, function (err, locations) {
-            res.send(JSON.stringify({"locations": locations}));
+            req.models.subscribers.get(subscriberId, function (err, subscriber) {
+                if(err) throw err;
+                locations.subscribers = subscriber;
+                console.log(locations);
+                res.send(JSON.stringify({"locations": locations}));
+            });
         });
     } else {
         req.models.location.all(function (err, locations) {
@@ -450,29 +456,29 @@ app.post(notifyUrl, function (req, res, next) {
     io.emit('new log', subscriberNumber, 'receive', new Date().toLocaleString());
 
     /*req.models.message.create({
-        content: message,
-        timestamp: new Date()
-    }, function (err, msg) {
-        if (err) throw err;
-        if(message.toUpperCase() == "SAGIP CANCEL") {
-            req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
-                if (err) throw err;
-                subscriber.status = "INDANGER";
-                msg.setSender(subscriber[0], function (err) { if (err) throw err; });
-            }).save(function (err) { if(err) throw err; });
-        } else if(message.toUpperCase().startsWith("SAGIP")) {
-            req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
-                if (err) throw err;
-                subscriber.status = "IDLE";
-                msg.setSender(subscriber[0], function (err) { if (err) throw err; });
-            }).save(function (err) { if(err) throw err; });
-        } else {
-            req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
-                if (err) throw err;
-                msg.setSender(subscriber[0], function (err) { if (err) throw err; });
-            });
-        }
-    });*/
+     content: message,
+     timestamp: new Date()
+     }, function (err, msg) {
+     if (err) throw err;
+     if(message.toUpperCase() == "SAGIP CANCEL") {
+     req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
+     if (err) throw err;
+     subscriber.status = "INDANGER";
+     msg.setSender(subscriber[0], function (err) { if (err) throw err; });
+     }).save(function (err) { if(err) throw err; });
+     } else if(message.toUpperCase().startsWith("SAGIP")) {
+     req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
+     if (err) throw err;
+     subscriber.status = "IDLE";
+     msg.setSender(subscriber[0], function (err) { if (err) throw err; });
+     }).save(function (err) { if(err) throw err; });
+     } else {
+     req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
+     if (err) throw err;
+     msg.setSender(subscriber[0], function (err) { if (err) throw err; });
+     });
+     }
+     });*/
 
     res.send(JSON.stringify(req.body, null, 4));
 });
