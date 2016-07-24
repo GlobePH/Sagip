@@ -32,8 +32,8 @@ var map;
 var origin_location;
 var markers = [];
 
-var origin_latitude = 14.553406;
-var origin_longitude = 121.049923;
+var origin_latitude;
+var origin_longitude;
 var icons = ["blue-marker.png","gray-marker.png","green-marker.png","orange-marker.png","red-marker.png","violet-marker.png","yellow-marker.png"];
 
 //sets up map and fetch markings from database

@@ -436,7 +436,6 @@ app.post(notifyUrl, function (req, res, next) {
 
     console.log("Message received: " + message + " from: " + subscriberNumber);
 
-
     req.models.message.create({
         content: message,
         timestamp: new Date()
