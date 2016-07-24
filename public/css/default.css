@@ -460,3 +460,18 @@ body {
 .table {
     background-color: white;
 }
+
+.font-sidebar {
+    color: #999999;
+}
+
+.sidebar-nav li.active {
+    text-decoration: none;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.2);
+    border-left: #e84c3c 2px solid;
+}
+
+.sidebar-nav li.active a {
+    color: #fff;
+}
