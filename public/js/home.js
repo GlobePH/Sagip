@@ -17,7 +17,7 @@ $(document).ready(function () {
             if (markers[i].subscriberNumber == subscriberNumber) {
                 console.log("Changed marker");
                 console.log(markers[i]);
-                markers[i].setIcon('/images/markers/' + icons[6]);
+                markers[i].marker.setIcon('/images/markers/' + icons[4]);
                 console.log("Done!");
             }
         }
