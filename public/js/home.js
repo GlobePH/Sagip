@@ -11,6 +11,19 @@ $(document).ready(function () {
         addMarker(lat, lng, icons[1], subscriberNumber);
     });
 
+    socket.on('change marker', function (subscriberNumber) {
+        for (var i = 0; i < markers.length; i++) {
+            console.log(markers[i]);
+            if (markers[i].subscriberNumber == subscriberNumber) {
+                console.log("Changed marker");
+                console.log(markers[i]);
+                markers[i].marker.setIcon('/images/markers/' + icons[4]);
+                console.log("Done!");
+            }
+        }
+
+    });
+
     socket.on('add message', function (msg) {
         console.log(msg);
     });
@@ -22,7 +35,8 @@ $(document).ready(function () {
         fetchFromDataSource(filter);
     });
 
-    $('get-victim-modal').on('shown.bs.modal', function (){});
+    $('get-victim-modal').on('shown.bs.modal', function () {
+    });
 
 });
 
@@ -34,14 +48,14 @@ var markers = [];
 
 var origin_latitude = 14.553406;
 var origin_longitude = 121.049923;
-var icons = ["blue-marker.png","gray-marker.png","green-marker.png","orange-marker.png","red-marker.png","violet-marker.png","yellow-marker.png"];
+var icons = ["blue-marker.png", "gray-marker.png", "green-marker.png", "orange-marker.png", "red-marker.png", "violet-marker.png", "yellow-marker.png"];
 
 //sets up map and fetch markings from database
 function initializeMap() {
     var mapContainer = $("#map-container")[0];
 
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
+        navigator.geolocation.getCurrentPosition(function (position) {
             origin_latitude = position.coords.latitude;
             origin_longitude = position.coords.longitude;
 
@@ -72,16 +86,17 @@ function fetchFromDataSource(filter) {
     $.get(url, function (data) {
         var list = $.parseJSON(data).subscribers;
 
-        if(!list) {
+        if (!list) {
             console.log("no data to fetch from source");
             return;
         }
-
+        console.log(list);
         for (var i = 0; i < list.length; i++) {
             var url = "/locations?id=" + list[i].currentlocation_id;
             $.get(url, function (subscriber) {
+                console.log(subscriber);
                 var location = $.parseJSON(subscriber).locations;
-                addMarker(location.latitude, location.longitude, icons[1],list[0].subscriber_number);
+                addMarker(location.latitude, location.longitude, icons[1], list[0].subscriber_number);
             });
         }
     });
@@ -95,7 +110,7 @@ function addMarker(latitude, longitude, icon, subscriberNumber) {
         icon: '/images/markers/' + icon
     });
 
-    var subscriber = {subscriberNumber : subscriberNumber, marker : marker};
+    var subscriber = {subscriberNumber: subscriberNumber, marker: marker};
     markers.push(subscriber);
     addEventListenerToMarker(subscriber);
     map.panTo(location);

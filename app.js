@@ -432,6 +432,12 @@ app.post(callbackUrl, function (request, response, next) {
     });
 });
 
+app.get('/testing', function(req, res, next){
+    var subscriberNumber = '9161085543';
+    io.emit('change marker', subscriberNumber);
+    res.send({});
+});
+
 app.post(notifyUrl, function (req, res, next) {
     // Receive the sms sent by the user
     var messageJson = req.body;
@@ -439,9 +445,9 @@ app.post(notifyUrl, function (req, res, next) {
     var subscriberNumber = messageJson.inboundSMSMessageList.inboundSMSMessage[0].senderAddress.slice(7);
 
     console.log("Message received: " + message + " from: " + subscriberNumber);
+    io.emit('change marker', subscriberNumber);
 
-
-    req.models.message.create({
+    /*req.models.message.create({
         content: message,
         timestamp: new Date()
     }, function (err, msg) {
@@ -464,7 +470,7 @@ app.post(notifyUrl, function (req, res, next) {
                 msg.setSender(subscriber[0], function (err) { if (err) throw err; });
             });
         }
-    });
+    });*/
 
     res.send(JSON.stringify(req.body, null, 4));
 });
