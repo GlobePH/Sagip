@@ -96,16 +96,13 @@ function fetchFromDataSource(filter) {
             return;
         }
 
-        console.log(list);
-
         for (var i = 0; i < list.length; i++) {
-            var url = "/locations?id=" + list[i].currentlocation_id + "&subscriber_id=" + list[i].subscriber_id;
+            var url = "/locations?id=" + list[i].currentlocation_id + "&subscriber_id=" + list[i].id;
             var number = list[i].subscriber_number;
 
             $.get(url, function (subscriber) {
-                console.log(subscriber);
                 var location = $.parseJSON(subscriber).locations;
-                var number = $.parseJSON(subscriber).number;
+                var number = location.subscribers.subscriber_number;
                 addMarker(location.latitude, location.longitude, icons[1], number);
             });
 
