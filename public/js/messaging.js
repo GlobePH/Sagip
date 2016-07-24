@@ -63,7 +63,7 @@ function addMessage(status, content, timestamp) {
     $('#thread-body').append(tag);
 }
 
-function selectContact(element) {
+function selectContact(element) {    
     deselectContacts(element);
 
     var index = $(element).prevAll().length;
@@ -75,6 +75,8 @@ function selectContact(element) {
         for (var i = 0; i < messages.length; i++) {
             addMessage(false, messages[i].content, new Date(messages[i].timestamp).toDateString());
         }
+
+        $("#thread-body").animate({ scrollTop: $("#thread-body")[0].scrollHeight}, 1000);
     });
 
     $.get('/admin-messages?subscriber_id=' + subscribers[index].id, function (data) {
@@ -82,6 +84,8 @@ function selectContact(element) {
         for (var i = 0; i < messages.length; i++) {
             addMessage(true, messages[i].content, new Date(messages[i].timestamp).toDateString());
         }
+
+        $("#thread-body").animate({ scrollTop: $("#thread-body")[0].scrollHeight}, 1000);
     });
 
     var loc_url = '/locations?id=' + subscribers[index].currentlocation_id;
@@ -100,6 +104,7 @@ function selectContact(element) {
         });
 
     });
+
 }
 
 function deselectContacts(element) {
