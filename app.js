@@ -140,6 +140,13 @@ app.get('/users', function (req, res) {
     });
 });
 
+app.get('/api/logs', function (req, res) {
+    req.models.logs.all(function (err, logs) {
+        if (err) throw error;
+        res.send(JSON.stringify({"logs": logs}));
+    });
+});
+
 app.get('/locate', function (req, res) {
     var units = req.query['units'];
     var origins = req.query['origins'];
@@ -453,7 +460,10 @@ app.post(notifyUrl, function (req, res, next) {
     var message = messageJson.inboundSMSMessageList.inboundSMSMessage[0].message;
     var subscriberNumber = messageJson.inboundSMSMessageList.inboundSMSMessage[0].senderAddress.slice(7);
 
-    req.models.logs.create({message: "Message received: " + message + " from: " + subscriberNumber}, function (err, log) {
+    req.models.logs.create({
+        message: "Message received: " + message + " from: " + subscriberNumber,
+        timestamp: new Date()
+    }, function (err, log) {
         if (err) throw err;
         console.log(log);
     });
