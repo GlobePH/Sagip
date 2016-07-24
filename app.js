@@ -484,7 +484,7 @@ app.post(notifyUrl, function (req, res, next) {
 
     req.models.history.create({
         message: "Message received: " + message + " from: " + subscriberNumber,
-        timestamp: new Date(),
+        timestamp: new Date()
     }, function (err, log) {
         if (err) throw err;
         console.log(log);
