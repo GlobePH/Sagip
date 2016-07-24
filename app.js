@@ -165,9 +165,15 @@ app.get('/locations', function (req, res) {
      * @param id = the location id that we want to retrieve specifically
      * */
     var id = req.query['id'];
+    var subscriberId = req.query['subscriber_id'];
     if (id) {
         req.models.location.get(id, function (err, locations) {
-            res.send(JSON.stringify({"locations": locations}));
+            req.models.subscribers.get(subscriberId, function (err, subscriber) {
+                if(err) throw err;
+                locations.subscribers = subscriber;
+                console.log(locations);
+                res.send(JSON.stringify({"locations": locations}));
+            });
         });
     } else {
         req.models.location.all(function (err, locations) {

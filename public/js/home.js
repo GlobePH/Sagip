@@ -95,17 +95,21 @@ function fetchFromDataSource(filter) {
             console.log("no data to fetch from source");
             return;
         }
-        console.log(list);
+
         for (var i = 0; i < list.length; i++) {
-            var url = "/locations?id=" + list[i].currentlocation_id;
+            var url = "/locations?id=" + list[i].currentlocation_id + "&subscriber_id=" + list[i].id;
+            var number = list[i].subscriber_number;
+
             $.get(url, function (subscriber) {
-                console.log(subscriber);
                 var location = $.parseJSON(subscriber).locations;
-                addMarker(location.latitude, location.longitude, icons[1], list[0].subscriber_number);
+                var number = location.subscribers.subscriber_number;
+                addMarker(location.latitude, location.longitude, icons[1], number);
             });
+
         }
     });
 }
+
 
 function addMarker(latitude, longitude, icon, subscriberNumber) {
     var location = new google.maps.LatLng(latitude, longitude);
