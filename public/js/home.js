@@ -123,7 +123,7 @@ function addMarker(latitude, longitude, icon, subscriberNumber) {
     var subscriber = {subscriberNumber: subscriberNumber, marker: marker};
     markers.push(subscriber);
     addEventListenerToMarker(subscriber);
-    map.panTo(location);
+//    map.panTo(location);
     console.log("new marker added on: " + location);
 }
 

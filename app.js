@@ -394,7 +394,7 @@ function onProcessGETCallback(req, res, next) {
 
             // TODO : For Testing
             currentLocation = locationJson.terminalLocationList.terminalLocation.currentLocation;
-            address_url = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + currentLocation.latitude + "," + currentLocation.longitude;
+            address_url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + currentLocation.latitude + "," + currentLocation.longitude;
 
             io.emit('add marker', currentLocation.latitude, currentLocation.longitude, subscriberNumber);
 
