@@ -69,6 +69,12 @@ app.use(orm.express('postgres://kxedkdjhlvemzg:AzFP0H0DB-uoCuJaxR4lme8BFq@ec2-54
             admin: Boolean
         });
 
+        models.logs = db.define("log", {
+            message: String,
+            timestamp: Date
+
+        });
+
         models.message = db.define("message", {
             content: String,
             timestamp: Date
@@ -178,8 +184,10 @@ app.get('/subscribers', function (req, res) {
      if (err) throw error;
      res.send(JSON.stringify({"subscribers": subscribers}));
      });*/
-
-    if (req.query["filter"]) {
+    console.log("Fetching subscribers");
+    console.log(filter);
+    if (req.query["filter"] != undefined) {
+        console.log("Filter is null, hence");
         req.models.subscribers.find({active: true}).where(" LOWER(status) = ?", filter).all(function (err, subscribers) {
             console.log("subscriber : " + subscribers[0]);
             res.send(JSON.stringify({"subscribers": subscribers}));
@@ -264,6 +272,7 @@ app.get('/send-message', function (req, res) {
     var number = req.query['subscriber_number'];
     var message = req.query['message'];
 
+    io.emit('new log', number, 'send', new Date().toLocaleString());
     send(req, number, message);
 });
 
@@ -432,7 +441,7 @@ app.post(callbackUrl, function (request, response, next) {
     });
 });
 
-app.get('/testing', function(req, res, next){
+app.get('/testing', function (req, res, next) {
     var subscriberNumber = '9161085543';
     io.emit('change marker', subscriberNumber);
     res.send({});
@@ -446,31 +455,32 @@ app.post(notifyUrl, function (req, res, next) {
 
     console.log("Message received: " + message + " from: " + subscriberNumber);
     io.emit('change marker', subscriberNumber);
+    io.emit('new log', subscriberNumber, 'receive', new Date().toLocaleString());
 
     /*req.models.message.create({
-        content: message,
-        timestamp: new Date()
-    }, function (err, msg) {
-        if (err) throw err;
-        if(message.toUpperCase() == "SAGIP CANCEL") {
-            req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
-                if (err) throw err;
-                subscriber.status = "INDANGER";
-                msg.setSender(subscriber[0], function (err) { if (err) throw err; });
-            }).save(function (err) { if(err) throw err; });
-        } else if(message.toUpperCase().startsWith("SAGIP")) {
-            req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
-                if (err) throw err;
-                subscriber.status = "IDLE";
-                msg.setSender(subscriber[0], function (err) { if (err) throw err; });
-            }).save(function (err) { if(err) throw err; });
-        } else {
-            req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
-                if (err) throw err;
-                msg.setSender(subscriber[0], function (err) { if (err) throw err; });
-            });
-        }
-    });*/
+     content: message,
+     timestamp: new Date()
+     }, function (err, msg) {
+     if (err) throw err;
+     if(message.toUpperCase() == "SAGIP CANCEL") {
+     req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
+     if (err) throw err;
+     subscriber.status = "INDANGER";
+     msg.setSender(subscriber[0], function (err) { if (err) throw err; });
+     }).save(function (err) { if(err) throw err; });
+     } else if(message.toUpperCase().startsWith("SAGIP")) {
+     req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
+     if (err) throw err;
+     subscriber.status = "IDLE";
+     msg.setSender(subscriber[0], function (err) { if (err) throw err; });
+     }).save(function (err) { if(err) throw err; });
+     } else {
+     req.models.subscribers.find({subscriber_number: subscriberNumber}, function (err, subscriber) {
+     if (err) throw err;
+     msg.setSender(subscriber[0], function (err) { if (err) throw err; });
+     });
+     }
+     });*/
 
     res.send(JSON.stringify(req.body, null, 4));
 });
