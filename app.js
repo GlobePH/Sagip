@@ -483,7 +483,7 @@ app.post(notifyUrl, function (req, res, next) {
     var subscriberNumber = messageJson.inboundSMSMessageList.inboundSMSMessage[0].senderAddress.slice(7);
 
     req.models.history.create({
-        message: "Message received: " + message + " from: " + subscriberNumber,
+        content: "Message received: " + message + " from: " + subscriberNumber,
         timestamp: new Date()
     }, function (err, log) {
         if (err) throw err;
