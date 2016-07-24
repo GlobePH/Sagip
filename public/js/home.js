@@ -97,7 +97,8 @@ function fetchFromDataSource(filter) {
         }
 
         for (var i = 0; i < list.length; i++) {
-            var url = "/locations?id=" + list[i].currentlocation_id + "&subscriber_id=" + list[i].id;
+            console.log(list[i]);
+            var url = "/locations-by-id?id=" + list[i].currentlocation_id + "&subscriber_id=" + list[i].id;
             var number = list[i].subscriber_number;
 
             $.get(url, function (subscriber) {
