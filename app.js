@@ -74,6 +74,11 @@ app.use(orm.express('postgres://kxedkdjhlvemzg:AzFP0H0DB-uoCuJaxR4lme8BFq@ec2-54
             timestamp: Date
         });
 
+        models.history = db.define("history", {
+            content: String,
+            timestamp: Date
+        });
+
         models.message_admin = db.define("message_admin", {
             content: String,
             timestamp: Date
@@ -135,9 +140,9 @@ app.get('/users', function (req, res) {
 });
 
 app.get('/api/logs', function (req, res) {
-    req.models.logs.all(function (err, logs) {
+    req.models.history.all(function (err, data) {
         if (err) throw error;
-        res.send(JSON.stringify({"logs": logs}));
+        res.send(JSON.stringify({"logs": data}));
     });
 });
 
