@@ -111,6 +111,10 @@ app.get('/partners', function (req, res) {
     res.render("organizations", {title: "Partner Organizaztions ", showBar: false});
 });
 
+app.get('/login', function (req, res) {
+    res.render("login", {title: "Log In ", showBar: false});
+});
+
 
 /*
  * Sagip API

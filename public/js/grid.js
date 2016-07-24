@@ -346,7 +346,7 @@ var Grid = (function() {
 			this.$title = $( '<h3 style="display: inline; float: right; margin: 30px 0 0 20px"></h3>' );
 			/* this.$description = $( '<p></p>' );
 			this.$details = $( '<div class="og-details"></div>' ).append( this.$description ); */
-			this.$button = $( '<button class="btn btn-red og-button" style="font-weight: normal"><i class="fa fa-user-plus"></i>  Add Rescuer</button>' );
+			this.$button = $( '<button class="btn btn-red og-button" data-toggle="modal" data-target="#add-rescuer-modal" style="font-weight: normal"><i class="fa fa-user-plus"></i>  Add Rescuer</button>' );
 			this.$loading = $( '<div class="og-loading"></div>' );
 			this.$fullimage = $( '<div class="og-smallimg"></div>' ).append( this.$title, this.$loading );
 			this.$previewInner2 = $( '<span class="og-close"></span><div class="container-fluid"><div class="col-lg-12"><table class="table"><thead><tr><th>Name</th><th>Username</th><th>Contact Number</th></tr></thead><tbody><tr><td>Roselle Ebarle</td><td>roselleebarle</td><td>09123456789</td></tr><tr><td>Regina Alyssa Esguerra</td><td>reginaalyssa</td><td>09176206021</td></tr><tr><td>Jason Bajade</td><td>thejasonbajade</td><td>09756472643</td></tr><tr><td>Angelo Guiam</td><td>gelloguiam</td><td>09157462772</td></tr></tbody></table></div></div>' );
